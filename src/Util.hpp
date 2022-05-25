@@ -11,5 +11,5 @@ using Complex = std::complex<double>;
 
 #define THROW(msg) std::cout << msg << std::endl; throw msg;
 
-
+#define LOG() if (!cc4x::dw->rank) std::cout
 

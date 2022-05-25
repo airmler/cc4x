@@ -45,13 +45,13 @@ namespace Drccd{
     energy.read_all(&exchange);
     int Nk(cc4x::kmesh->Nk);
     int N3(Nk*Nk*Nk);
-    std::cout << "direct: " << real(direct)/N3;
-    if (std::abs(imag(direct)/N3) > 1e-5)
-      std::cout << " + imag! " << imag(direct)/N3;
+    std::cout << "direct: " << real(direct);
+    if (std::abs(imag(direct)) > 1e-5)
+      std::cout << " + imag! " << imag(direct);
     std::cout << std::endl;
-    std::cout << "exchange: " << real(exchange)/N3;
-    if (std::abs(imag(exchange)/N3) > 1e-5)
-      std::cout << " + imag! " << imag(exchange)/N3;
+    std::cout << "exchange: " << real(exchange);
+    if (std::abs(imag(exchange)) > 1e-5)
+      std::cout << " + imag! " << imag(exchange);
     std:cout << std::endl;
 
     return;

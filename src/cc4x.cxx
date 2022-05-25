@@ -14,7 +14,8 @@
 // ever tried. ever failed. no matter. try again. fail again. fail better.
 #define NULL_TENSOR ((CTF::bsTensor<Complex>*)0xfafa)
 
-
+bool cc4x::verbose = 0;
+bool cc4x::complexT;
 int cc4x::No;
 int cc4x::Nv;
 CTF::World * cc4x::dw = NULL;
@@ -43,44 +44,45 @@ int main(int argc, char **argv){
   CTF::bsTensor<Complex> *Vhhpp = NULL_TENSOR;
 
   try {
+    Read::getAmplitudesType("CoulombVertex.yaml");
     {
-      std::cout << "read eigen" << std::endl;
+      LOG() << "read eigen" << std::endl;
       Read::input in({"EigenEnergies.yaml"});
       Read::output out({&eps});
       Read::run(in, out);
     }
     {
-      std::cout << "read coulomb" << std::endl;
+      LOG() << "read coulomb" << std::endl;
       Read::input in({"CoulombVertex.yaml"});
       Read::output out({&coulombVertex});
       Read::run(in, out);
     }
     {
-      std::cout << "slice eps" << std::endl;
+      LOG() << "slice eps" << std::endl;
       Slice::input in({eps, {cc4x::No}});
       Slice::output out({&epsi, &epsa});
       Slice::run(in, out);
     }
     {
-      std::cout << "slice ck" << std::endl;
+      LOG() << "slice ck" << std::endl;
       Slice::input in({coulombVertex, {0, cc4x::No, cc4x::No}});
       Slice::output out({&hhVertex, &phVertex, &hpVertex, &ppVertex});
       Slice::run(in, out);
     }
     {
-      std::cout << "eval Integrals" << std::endl;
+      LOG()<< "eval Integrals" << std::endl;
       Integrals::input in({hhVertex, phVertex, hpVertex, ppVertex});
       Integrals::output out({&Vpphh, &Vphhp, &Vhhpp});
       Integrals::run(in, out);
     }
     {
-      std::cout << "drccd" << std::endl;
+      LOG() << "drccd" << std::endl;
       Drccd::input in({Vpphh, Vphhp, Vhhpp, epsi, epsa});
       Drccd::output out({});
       Drccd::run(in, out);
     }
   } catch (...) {
-    std::cout << "WHAT THE FUCK" << std::endl;
+    LOG() << "WHAT THE FUCK" << std::endl;
   }
 
 

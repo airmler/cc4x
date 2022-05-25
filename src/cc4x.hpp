@@ -6,6 +6,8 @@
 
 class cc4x {
   public: 
+   static bool verbose;
+   static bool complexT;
    static int No;
    static int Nv;
    static CTF::World *dw;

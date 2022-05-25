@@ -12,6 +12,7 @@ namespace Read {
     CTF::bsTensor<Complex> **T;
   };
   void run(input const& in, output &out);
+  void getAmplitudesType(std::string fileName);
 
   struct yamlData {
     std::string fileName;

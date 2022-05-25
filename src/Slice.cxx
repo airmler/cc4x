@@ -36,21 +36,20 @@ namespace Slice{
     for (size_t o(0); o < order; o++)
       dstEnd[s][o] = srcEnd[s][o] - srcBegin[s][o];
 
- 
-    std::cout << "slicing into " << srcBegin.size() << " tensors" << std::endl;
-/*    for (size_t i(0); i < srcBegin.size(); i++){
+    if (cc4x::verbose) {
+      LOG() << "slicing into " << srcBegin.size() << " tensors" << std::endl;
+      for (size_t i(0); i < srcBegin.size(); i++){
       for (size_t o(0); o < order; o++)
-        std::cout << "[" << srcBegin[i][o] << " - " << srcEnd[i][o] << "]";
-      printf("\n");
-    }
-*/
-/*    printf("====\n");
-    for (size_t i(0); i < dstBegin.size(); i++){
+        LOG() << "[" << srcBegin[i][o] << " - " << srcEnd[i][o] << "]";
+      LOG() << std::endl;
+      }
+      LOG() << "=====\n";
+      for (size_t i(0); i < dstBegin.size(); i++){
       for (size_t o(0); o < order; o++)
-        std::cout << "[" << dstBegin[i][o] << " - " << dstEnd[i][o] << "]";
-      printf("\n");
+        LOG() << "[" << dstBegin[i][o] << " - " << dstEnd[i][o] << "]";
+      LOG()  << std::endl;
+      }
     }
-*/ 
     return {srcBegin, srcEnd, dstBegin, dstEnd};
   }
 
@@ -69,31 +68,31 @@ namespace Slice{
     if (slices.dstBegin.size() > 4) {
       THROW("We cannot slice into more that 4 objects");
     }
-  
-   
+
+
     auto dummyA = new CTF::bsTensor<Complex>(
       order, slices.dstEnd[0], cc4x::kmesh->getNZC(order), cc4x::dw
     );
-    dummyA->slice(slices.dstBegin[0], slices.dstEnd[0], 0.0, *in.I, slices.srcBegin[0], slices.srcEnd[0], 1.0); 
+    dummyA->slice(slices.dstBegin[0], slices.dstEnd[0], 0.0, *in.I, slices.srcBegin[0], slices.srcEnd[0], 1.0);
     *out.A = dummyA;
 
     auto dummyB = new CTF::bsTensor<Complex>(
       order, slices.dstEnd[1], cc4x::kmesh->getNZC(order), cc4x::dw
     );
-    dummyB->slice(slices.dstBegin[1], slices.dstEnd[1], 0.0, *in.I, slices.srcBegin[1], slices.srcEnd[1], 1.0); 
+    dummyB->slice(slices.dstBegin[1], slices.dstEnd[1], 0.0, *in.I, slices.srcBegin[1], slices.srcEnd[1], 1.0);
     *out.B = dummyB;
 
     if (slices.dstBegin.size() == 2) return;
     auto dummyC = new CTF::bsTensor<Complex>(
       order, slices.dstEnd[2], cc4x::kmesh->getNZC(order), cc4x::dw
     );
-    dummyC->slice(slices.dstBegin[2], slices.dstEnd[2], 0.0, *in.I, slices.srcBegin[2], slices.srcEnd[2], 1.0); 
+    dummyC->slice(slices.dstBegin[2], slices.dstEnd[2], 0.0, *in.I, slices.srcBegin[2], slices.srcEnd[2], 1.0);
     *out.C = dummyC;
 
     auto dummyD = new CTF::bsTensor<Complex>(
       order, slices.dstEnd[3], cc4x::kmesh->getNZC(order), cc4x::dw
     );
-    dummyD->slice(slices.dstBegin[3], slices.dstEnd[3], 0.0, *in.I, slices.srcBegin[3], slices.srcEnd[3], 1.0); 
+    dummyD->slice(slices.dstBegin[3], slices.dstEnd[3], 0.0, *in.I, slices.srcBegin[3], slices.srcEnd[3], 1.0);
     *out.D = dummyD;
 
     return;

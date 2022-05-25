@@ -3,15 +3,36 @@
 
 namespace Read{
 
+  void getAmplitudesType(std::string fileName){
+    YAML::Node yamlFile;
+    try { yamlFile = YAML::LoadFile(fileName); }
+    catch ( const YAML::Exception &cause){
+      THROW("CoulombVertex file not present or badly formatted");
+    }
+    bool jobDone(false);
+    if (yamlFile["metaData"]){
+      auto meta = yamlFile["metaData"];
+      if (meta["halfGrid"]){
+        cc4x::complexT = meta["halfGrid"].as<int>();
+        jobDone = true;
+      }
+    }
+    if (!jobDone) { THROW("Amplitudes type could not be determined"); }
+    if (cc4x::complexT)
+      LOG() << "Working with complex Ampltiudes/Integrals\n";
+    else
+      LOG() << "Working with real Ampltiudes/Integrals\n";
+  }
+
   yamlData readYaml(YAML::Node yamlFile){
     yamlData y;
-     
+
     if (yamlFile["elements"]){
       auto elements = yamlFile["elements"];
       if (elements["type"]) {
         y.fileType = elements["type"].as<std::string>();
       }
-    } 
+    }
     if (yamlFile["dimensions"]) {
       auto dimensions = yamlFile["dimensions"];
       y.order = dimensions.size();
@@ -22,7 +43,7 @@ namespace Read{
       y.scalarType = yamlFile["scalarType"].as<std::string>();
     if (yamlFile["metaData"]){
       auto meta = yamlFile["metaData"];
-      if (meta["No"]) y.No = meta["No"].as<int>(); 
+      if (meta["No"]) y.No = meta["No"].as<int>();
       if (meta["Nv"]) y.Nv = meta["Nv"].as<int>();
       if (meta["kMesh"]) y.kMesh = meta["kMesh"].as<ivec>();
       if (meta["halfGrid"]) y.halfGrid = meta["halfGrid"].as<int>();
@@ -46,16 +67,11 @@ namespace Read{
       if (y.kMesh != cc4x::kmesh->mesh) {
         THROW("inconsistent meshes in input-yaml");
       }
-    auto dataFile 
+    auto dataFile
       = in.fileName.substr(0, in.fileName.find_last_of(".")) + ".elements";
     std::ifstream file;
     file.open(dataFile, std::ifstream::in);
     if (!file.is_open()) { THROW("element file not present"); }
-
-    //TODO: maybe not the most professional way...
-    //if (file.is_open()) std::cout << "juhuu" << std::endl;
-    //else std::cout << "nee" << std::endl;
-
 
     auto d = new CTF::bsTensor<Complex>(
       y.order, y.lens, cc4x::kmesh->getNZC(y.order), cc4x::dw

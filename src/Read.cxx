@@ -92,8 +92,9 @@ namespace Read{
       file.close();
       auto Np(cc4x::No + cc4x::Nv);
       std::vector<int64_t> idx(Np);
-      std::iota(idx.begin(), idx.end(), 0);
-      d->write(Np, idx.data(), data.data());
+      if (!cc4x::dw->rank) std::iota(idx.begin(), idx.end(), 0);
+      if (cc4x::dw->rank)  d->write(0, idx.data(), data.data());
+      else                 d->write(Np, idx.data(), data.data());
     } else {
       MPI_File file;
       MPI_File_open(

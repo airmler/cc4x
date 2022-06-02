@@ -21,6 +21,14 @@ int cc4x::Nv;
 CTF::World * cc4x::dw = NULL;
 kMesh * cc4x::kmesh = NULL;
 
+void printSystem(){
+  if (cc4x::complexT) { LOG() << "Working with complex Integrals\n"; }
+  else { LOG() << "Working with real Integrals\n"; }
+  LOG() << "No: " << cc4x::No << " , Nv: " << cc4x::Nv << "\n";
+  LOG() << "kMesh: " << cc4x::kmesh->mesh[0] << " " << cc4x::kmesh->mesh[1] << " " << cc4x::kmesh->mesh[2] << "\n";
+}
+
+
 int main(int argc, char **argv){
   MPI_Init(&argc, &argv);
  
@@ -57,6 +65,7 @@ int main(int argc, char **argv){
       Read::output out({&coulombVertex});
       Read::run(in, out);
     }
+    printSystem();
     {
       LOG() << "slice eps" << std::endl;
       Slice::input in({eps, {cc4x::No}});

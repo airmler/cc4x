@@ -9,6 +9,7 @@
 #include <Slice.hpp>
 #include <Integrals.hpp>
 #include <Drccd.hpp>
+#include <Ccsd.hpp>
 
 // this is a insane hack.once in the lifetime of the universe, we will fail
 // ever tried. ever failed. no matter. try again. fail again. fail better.
@@ -31,7 +32,7 @@ void printSystem(){
 
 int main(int argc, char **argv){
   MPI_Init(&argc, &argv);
- 
+
 
   //cc4x::dw = new CTF::World("normal", 72);
   cc4x::dw = new CTF::World();
@@ -47,9 +48,22 @@ int main(int argc, char **argv){
   CTF::bsTensor<Complex> *hpVertex = NULL_TENSOR;
   CTF::bsTensor<Complex> *ppVertex = NULL_TENSOR;
 
-  CTF::bsTensor<Complex> *Vpphh = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vphhp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vhhhh = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vhhhp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vhhph = NULL_TENSOR;
   CTF::bsTensor<Complex> *Vhhpp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vhphp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vhppp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vphhh = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vphhp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vphph = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vphpp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vpphh = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vpphp = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vppph = NULL_TENSOR;
+  CTF::bsTensor<Complex> *Vpppp = NULL_TENSOR;
+
+
 
   try {
     Read::getAmplitudesType("CoulombVertex.yaml");
@@ -81,7 +95,7 @@ int main(int argc, char **argv){
     {
       LOG()<< "eval Integrals" << std::endl;
       Integrals::input in({hhVertex, phVertex, hpVertex, ppVertex});
-      Integrals::output out({&Vpphh, &Vphhp, &Vhhpp});
+      Integrals::output out({&Vhhhh, &Vhhhp, &Vhhph, &Vhhpp, &Vhphp, &Vhppp, &Vphhh, &Vphhp, &Vphph, &Vphpp, &Vpphh, &Vpphp, &Vppph, &Vpppp});
       Integrals::run(in, out);
     }
     {
@@ -90,11 +104,16 @@ int main(int argc, char **argv){
       Drccd::output out({});
       Drccd::run(in, out);
     }
+    {
+      LOG() << "ccsd" << std::endl;
+      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vhphp, Vhppp, Vphhh, Vphhp, Vphph, Vphpp, Vpphh, Vpphp, Vppph, Vpppp, epsi, epsa});
+      Ccsd::output out({});
+      Ccsd::run(in, out);
+    }
+
   } catch (...) {
     LOG() << "WHAT THE FUCK" << std::endl;
   }
-
-
 
   MPI_Finalize();
   return 0;

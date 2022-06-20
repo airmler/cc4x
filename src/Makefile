@@ -15,6 +15,11 @@ clean:
 CXX=mpic++
 CXXFLAGS := -std=c++11 -g -O0
 
+
+# BACKENDS
+CXXFLAGS += -DCTFBS_BACKEND
+
+
 CTF_PATH = /home/irmler/uni/kccsd/cc4x/ctf
 YAML_PATH = /home/irmler/uni/kccsd/cc4x/yaml-cpp/build/install
 CXXFLAGS += -I${CTF_PATH}/include

@@ -6,11 +6,11 @@
 
 namespace Drccd {
   struct input {
-    CTF::bsTensor<Complex> *Vpphh;
-    CTF::bsTensor<Complex> *Vphhp;
-    CTF::bsTensor<Complex> *Vhhpp;
-    CTF::bsTensor<Complex> *epsi;
-    CTF::bsTensor<Complex> *epsa;
+    tensor<Complex> *Vpphh;
+    tensor<Complex> *Vphhp;
+    tensor<Complex> *Vhhpp;
+    tensor<Complex> *epsi;
+    tensor<Complex> *epsa;
   };
   struct output {
   };

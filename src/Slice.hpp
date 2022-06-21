@@ -6,14 +6,14 @@
 
 namespace Slice {
   struct input {
-    CTF::bsTensor<Complex> *I;
+    tensor<Complex> *I;
     std::vector<int64_t> partitionPoint;
   };
   struct output {
-    CTF::bsTensor<Complex> **A;
-    CTF::bsTensor<Complex> **B;
-    CTF::bsTensor<Complex> **C;
-    CTF::bsTensor<Complex> **D;
+    tensor<Complex> **A;
+    tensor<Complex> **B;
+    tensor<Complex> **C;
+    tensor<Complex> **D;
   };
   void run(input const& in, output &out);
 

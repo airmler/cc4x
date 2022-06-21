@@ -7,10 +7,10 @@ namespace Scf{
   Complex   inv(Complex x){ return 1.0/x; }
 
   void evalEnergy(
-    CTF::bsTensor<Complex> &T, CTF::bsTensor<Complex> &V, std::string what
+    tensor<Complex> &T, tensor<Complex> &V, std::string what
   ){
 
-    CTF::bsTensor<Complex> energy(0, {}, cc4x::kmesh->getNZC(0), cc4x::dw, "e");
+    tensor<Complex> energy(0, {}, cc4x::kmesh->getNZC(0), cc4x::dw, "e");
     std::complex<double> direct, exchange;
     energy.contract(2.0, T, "abij", V, "ijab", 0.0, "");
     //std::memcpy(&direct, energy.tensors[0]->data, sizeof(Complex));
@@ -32,9 +32,9 @@ namespace Scf{
     }
   }
 
-  void getDabij( CTF::bsTensor<Complex> &Dabij
-               , CTF::bsTensor<Complex> &epsi
-               , CTF::bsTensor<Complex> &epsa){
+  void getDabij( tensor<Complex> &Dabij
+               , tensor<Complex> &epsi
+               , tensor<Complex> &epsa){
 
     CTF::Univar_Function<Complex> fInv(&inv);
     Dabij.sum(1.0, epsi, "i", 0.0, "abij");
@@ -44,9 +44,9 @@ namespace Scf{
     Dabij.sum(1.0, Dabij, "abij", 0.0, "abij", fInv);
   }
 
-  void getDai( CTF::bsTensor<Complex> &Dai
-             , CTF::bsTensor<Complex> &epsi
-             , CTF::bsTensor<Complex> &epsa){
+  void getDai( tensor<Complex> &Dai
+             , tensor<Complex> &epsi
+             , tensor<Complex> &epsa){
 
     CTF::Univar_Function<Complex> fInv(&inv);
     Dai.sum(1.0, epsi, "i", 0.0, "ai");

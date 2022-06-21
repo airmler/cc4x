@@ -9,7 +9,7 @@ namespace Read {
     std::string fileName;
   };
   struct output {
-    CTF::bsTensor<Complex> **T;
+    tensor<Complex> **T;
   };
   void run(input const& in, output &out);
   void getAmplitudesType(std::string fileName);

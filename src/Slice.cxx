@@ -5,7 +5,10 @@
 namespace Slice{
 
   sliceDim getDimensions(i64vec lens, i64vec pp){
-    if ( pp.size() != lens.size() ) { THROW("Invalid input!"); }
+    if ( pp.size() != lens.size() ) {
+      LOG() << pp.size() << " " << lens.size() << std::endl;
+      THROW("Invalid input!");
+    }
     auto order(lens.size());
     std::vector<i64vec> srcBegin(1, i64vec(order));
     std::vector<i64vec> srcEnd  (1, i64vec(order));
@@ -56,7 +59,7 @@ namespace Slice{
 
   void run(input const& in, output& out){
     // sanity checks
-    if (in.I == NULL || in.I == (CTF::bsTensor<Complex>*)0xfafa) {
+    if (in.I == NULL || in.I == (tensor<Complex>*)0xfafa) {
       THROW("Input of Slice not valid");
     }
     auto lens(in.I->lens);
@@ -70,27 +73,27 @@ namespace Slice{
     }
 
 
-    auto dummyA = new CTF::bsTensor<Complex>(
-      order, slices.dstEnd[0], cc4x::kmesh->getNZC(order), cc4x::dw
+    auto dummyA = new tensor<Complex>(
+      order, slices.dstEnd[0], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice1"
     );
     dummyA->slice(slices.dstBegin[0], slices.dstEnd[0], 0.0, *in.I, slices.srcBegin[0], slices.srcEnd[0], 1.0);
     *out.A = dummyA;
 
-    auto dummyB = new CTF::bsTensor<Complex>(
-      order, slices.dstEnd[1], cc4x::kmesh->getNZC(order), cc4x::dw
+    auto dummyB = new tensor<Complex>(
+      order, slices.dstEnd[1], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice2"
     );
     dummyB->slice(slices.dstBegin[1], slices.dstEnd[1], 0.0, *in.I, slices.srcBegin[1], slices.srcEnd[1], 1.0);
     *out.B = dummyB;
 
     if (slices.dstBegin.size() == 2) return;
-    auto dummyC = new CTF::bsTensor<Complex>(
-      order, slices.dstEnd[2], cc4x::kmesh->getNZC(order), cc4x::dw
+    auto dummyC = new tensor<Complex>(
+      order, slices.dstEnd[2], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice3"
     );
     dummyC->slice(slices.dstBegin[2], slices.dstEnd[2], 0.0, *in.I, slices.srcBegin[2], slices.srcEnd[2], 1.0);
     *out.C = dummyC;
 
-    auto dummyD = new CTF::bsTensor<Complex>(
-      order, slices.dstEnd[3], cc4x::kmesh->getNZC(order), cc4x::dw
+    auto dummyD = new tensor<Complex>(
+      order, slices.dstEnd[3], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice4"
     );
     dummyD->slice(slices.dstBegin[3], slices.dstEnd[3], 0.0, *in.I, slices.srcBegin[3], slices.srcEnd[3], 1.0);
     *out.D = dummyD;

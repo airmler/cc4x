@@ -3,6 +3,7 @@
 #include <complex>
 #include <fstream>
 #include <ctf.hpp>
+#include <Tensor.hpp>
 #include <iomanip>
 #include <yaml-cpp/yaml.h>
 

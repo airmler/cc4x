@@ -51,8 +51,9 @@
                char const *                    idx_B,
                std::vector< std::vector<int> > nonZeroA,
                std::vector< std::vector<int> > nonZeroB,
-               CTF::Univar_Function<F>         &fseq,
+               std::function<F(const F)>       &fseq,
                bool                            verbose=false){
+        CTF::Univar_Function<F> f(fseq);
         machine_tensor->sum(alpha,
                             *A.machine_tensor,
                             idx_A,
@@ -60,7 +61,7 @@
                             idx_B,
                             nonZeroA,
                             nonZeroB,
-                            fseq,
+                            f,
                             verbose);
       }
 
@@ -87,14 +88,16 @@
                char const *                    idx_A,
                F                               beta,
                char const *                    idx_B,
-               CTF::Univar_Function<F>         &fseq,
+               std::function<F(const F)>       &fseq,
                bool                            verbose=false){
+
+        CTF::Univar_Function<F> f(fseq);
         machine_tensor->sum(alpha,
                             *A.machine_tensor,
                             idx_A,
                             beta,
                             idx_B,
-                            fseq,
+                            f,
                             verbose);
       }
 

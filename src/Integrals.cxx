@@ -5,7 +5,6 @@
 namespace Integrals{
 
   Complex conjo(Complex x){ return std::conj(x); }
-  Complex   inv(Complex x){ return 1.0/x; }
 
   std::function<int(const ivec &, const ivec &)>
   compare(const ivec p)
@@ -39,8 +38,7 @@ namespace Integrals{
     tensor<Complex> conjGhh(3, ghh, nzc3, cc4x::dw, "cGhh");
     tensor<Complex> conjGpp(3, gpp, nzc3, cc4x::dw, "cGpp");
 
-
-    CTF::Univar_Function<Complex> fConj(&conjo);
+    std::function<Complex(const Complex)> fConj(&conjo);
     auto flip(in.hp->nonZeroCondition);
 
     // sort in a way that the second column in the fastest, third second fastest

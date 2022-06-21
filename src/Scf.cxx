@@ -36,7 +36,7 @@ namespace Scf{
                , tensor<Complex> &epsi
                , tensor<Complex> &epsa){
 
-    CTF::Univar_Function<Complex> fInv(&inv);
+    std::function<Complex(const Complex)> fInv(&inv);
     Dabij.sum(1.0, epsi, "i", 0.0, "abij");
     Dabij.sum(1.0, epsi, "j", 1.0, "abij");
     Dabij.sum(-1., epsa, "a", 1.0, "abij");
@@ -48,7 +48,7 @@ namespace Scf{
              , tensor<Complex> &epsi
              , tensor<Complex> &epsa){
 
-    CTF::Univar_Function<Complex> fInv(&inv);
+    std::function<Complex(const Complex)> fInv(&inv);
     Dai.sum(1.0, epsi, "i", 0.0, "ai");
     Dai.sum(-1., epsa, "a", 1.0, "ai");
     Dai.sum(1.0, Dai, "ai", 0.0, "ai", fInv);

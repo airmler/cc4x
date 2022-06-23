@@ -10,6 +10,7 @@
 #include <Integrals.hpp>
 #include <Drccd.hpp>
 #include <Ccsd.hpp>
+#include <Ueg.hpp>
 
 // this is a insane hack.once in the lifetime of the universe, we will fail
 // ever tried. ever failed. no matter. try again. fail again. fail better.
@@ -66,18 +67,23 @@ int main(int argc, char **argv){
 
 
   try {
-    Read::getAmplitudesType("CoulombVertex.yaml");
+//    Read::getAmplitudesType("CoulombVertex.yaml");
+//    {
+//      LOG() << "read eigen" << std::endl;
+//      Read::input in({"EigenEnergies.yaml"});
+//      Read::output out({&eps});
+//      Read::run(in, out);
+//    }
+//    {
+//      LOG() << "read coulomb" << std::endl;
+//      Read::input in({"CoulombVertex.yaml"});
+//      Read::output out({&coulombVertex});
+//      Read::run(in, out);
+//    }
     {
-      LOG() << "read eigen" << std::endl;
-      Read::input in({"EigenEnergies.yaml"});
-      Read::output out({&eps});
-      Read::run(in, out);
-    }
-    {
-      LOG() << "read coulomb" << std::endl;
-      Read::input in({"CoulombVertex.yaml"});
-      Read::output out({&coulombVertex});
-      Read::run(in, out);
+      Ueg::input in({7, 26, 1.0});
+      Ueg::output out({&coulombVertex, &eps});
+      Ueg::run(in, out);
     }
     printSystem();
     {

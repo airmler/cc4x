@@ -73,11 +73,9 @@ namespace Read{
     file.open(dataFile, std::ifstream::in);
     if (!file.is_open()) { THROW("element file not present"); }
 
-    auto d = new CTF::bsTensor<Complex>(
-      y.order, y.lens, cc4x::kmesh->getNZC(y.order), cc4x::dw
+    auto d = new tensor<Complex>(
+      y.order, y.lens, cc4x::kmesh->getNZC(y.order), cc4x::dw, "fileIO"
     );
-
-    //TODO: no data in our tensors, yet
     //TODO: the following is pretty crazy hardcoding:
     //      it assumes real data into complex tensor
     if (y.fileType == "TextFile"){

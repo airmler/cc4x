@@ -7,16 +7,16 @@
 namespace Scf {
 
   void evalEnergy(
-    CTF::bsTensor<Complex> &T, CTF::bsTensor<Complex> &V, std::string what = ""
+    tensor<Complex> &T, tensor<Complex> &V, std::string what = ""
   );
 
-  void getDabij( CTF::bsTensor<Complex> &Dabij
-               , CTF::bsTensor<Complex> &epsi
-               , CTF::bsTensor<Complex> &epsa);
+  void getDabij( tensor<Complex> &Dabij
+               , tensor<Complex> &epsi
+               , tensor<Complex> &epsa);
 
-  void getDai( CTF::bsTensor<Complex> &Dai
-             , CTF::bsTensor<Complex> &epsi
-             , CTF::bsTensor<Complex> &epsa);
+  void getDai( tensor<Complex> &Dai
+             , tensor<Complex> &epsi
+             , tensor<Complex> &epsa);
 
 
 

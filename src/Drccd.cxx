@@ -9,22 +9,22 @@ namespace Drccd{
     bool linearized(false);
     size_t maxIter(20);
     // sanity checks
-    if ( in.Vpphh == NULL || in.Vpphh == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vphhp == NULL || in.Vphhp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vhhpp == NULL || in.Vhhpp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.epsi == NULL  || in.epsi  == (CTF::bsTensor<Complex>*)0xfafa
-      || in.epsa == NULL  || in.epsa  == (CTF::bsTensor<Complex>*)0xfafa
+    if ( in.Vpphh == NULL || in.Vpphh == (tensor<Complex>*)0xfafa
+      || in.Vphhp == NULL || in.Vphhp == (tensor<Complex>*)0xfafa
+      || in.Vhhpp == NULL || in.Vhhpp == (tensor<Complex>*)0xfafa
+      || in.epsi == NULL  || in.epsi  == (tensor<Complex>*)0xfafa
+      || in.epsa == NULL  || in.epsa  == (tensor<Complex>*)0xfafa
        ) {
       THROW("Input of Drccd not valid");
     }
 
     int64_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
-    CTF::bsTensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    CTF::bsTensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
-    CTF::bsTensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
-    CTF::bsTensor<Complex> Calid(4, {p,h,h,p}, nzc4, cc4x::dw, "Calid");
-    CTF::bsTensor<Complex> Xijab(4, {h,h,p,p}, nzc4, cc4x::dw, "Xijab");
+    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
+    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
+    tensor<Complex> Calid(4, {p,h,h,p}, nzc4, cc4x::dw, "Calid");
+    tensor<Complex> Xijab(4, {h,h,p,p}, nzc4, cc4x::dw, "Xijab");
 
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
 

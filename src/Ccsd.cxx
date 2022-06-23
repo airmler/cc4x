@@ -8,19 +8,19 @@ namespace Ccsd{
   void run(input const& in, output& out){
     size_t maxIter(5);
     // sanity checks
-    if ( in.Vhhhh == NULL || in.Vhhhh == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vhhhp == NULL || in.Vhhhp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vhhph == NULL || in.Vhhph == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vhhpp == NULL || in.Vhhpp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vhppp == NULL || in.Vhppp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vphhp == NULL || in.Vphhp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vphph == NULL || in.Vphph == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vphpp == NULL || in.Vphpp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vpphh == NULL || in.Vpphh == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vppph == NULL || in.Vppph == (CTF::bsTensor<Complex>*)0xfafa
-      || in.Vpppp == NULL || in.Vpppp == (CTF::bsTensor<Complex>*)0xfafa
-      || in.epsi == NULL  || in.epsi  == (CTF::bsTensor<Complex>*)0xfafa
-      || in.epsa == NULL  || in.epsa  == (CTF::bsTensor<Complex>*)0xfafa
+    if ( in.Vhhhh == NULL || in.Vhhhh == (tensor<Complex>*)0xfafa
+      || in.Vhhhp == NULL || in.Vhhhp == (tensor<Complex>*)0xfafa
+      || in.Vhhph == NULL || in.Vhhph == (tensor<Complex>*)0xfafa
+      || in.Vhhpp == NULL || in.Vhhpp == (tensor<Complex>*)0xfafa
+      || in.Vhppp == NULL || in.Vhppp == (tensor<Complex>*)0xfafa
+      || in.Vphhp == NULL || in.Vphhp == (tensor<Complex>*)0xfafa
+      || in.Vphph == NULL || in.Vphph == (tensor<Complex>*)0xfafa
+      || in.Vphpp == NULL || in.Vphpp == (tensor<Complex>*)0xfafa
+      || in.Vpphh == NULL || in.Vpphh == (tensor<Complex>*)0xfafa
+      || in.Vppph == NULL || in.Vppph == (tensor<Complex>*)0xfafa
+      || in.Vpppp == NULL || in.Vpppp == (tensor<Complex>*)0xfafa
+      || in.epsi == NULL  || in.epsi  == (tensor<Complex>*)0xfafa
+      || in.epsa == NULL  || in.epsa  == (tensor<Complex>*)0xfafa
        ) {
       THROW("Input of Ccsd not valid");
     }
@@ -28,27 +28,27 @@ namespace Ccsd{
     int64_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto nzc2(cc4x::kmesh->getNZC(2));
-    CTF::bsTensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
-    CTF::bsTensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    CTF::bsTensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
-    CTF::bsTensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
-    CTF::bsTensor<Complex> Tai(2, {p,h}, nzc2, cc4x::dw, "Tai");
-    CTF::bsTensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
+    tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
+    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
+    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
+    tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::dw, "Tai");
+    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
 
 
-    CTF::bsTensor<Complex> Kac(2, {p,p}, nzc2, cc4x::dw, "Kac");
-    CTF::bsTensor<Complex> Kki(2, {h,h}, nzc2, cc4x::dw, "Kki");
-    CTF::bsTensor<Complex> Lac(2, {p,p}, nzc2, cc4x::dw, "Lac");
-    CTF::bsTensor<Complex> Lki(2, {h,h}, nzc2, cc4x::dw, "Lki");
-    CTF::bsTensor<Complex> Kck(2, {p,h}, nzc2, cc4x::dw, "Kck");
-    CTF::bsTensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
-    CTF::bsTensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
-    CTF::bsTensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::dw, "Xakic");
-    CTF::bsTensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::dw, "Xakci");
-    CTF::bsTensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::dw, "Xklij");
-    CTF::bsTensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::dw, "Xabij");
-    CTF::bsTensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
-    CTF::bsTensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
+    tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::dw, "Kac");
+    tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::dw, "Kki");
+    tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::dw, "Lac");
+    tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::dw, "Lki");
+    tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::dw, "Kck");
+    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
+    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
+    tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::dw, "Xakic");
+    tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::dw, "Xakci");
+    tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::dw, "Xklij");
+    tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::dw, "Xabij");
+    tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
+    tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
 
 
 

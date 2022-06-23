@@ -14,7 +14,7 @@
 
 // this is a insane hack.once in the lifetime of the universe, we will fail
 // ever tried. ever failed. no matter. try again. fail again. fail better.
-#define NULL_TENSOR ((CTF::bsTensor<Complex>*)0xfafa)
+#define NULL_TENSOR ((tensor<Complex>*)0xfafa)
 
 bool cc4x::verbose = 0;
 bool cc4x::complexT;
@@ -38,31 +38,31 @@ int main(int argc, char **argv){
   //cc4x::dw = new CTF::World("normal", 72);
   cc4x::dw = new CTF::World();
 
-  CTF::bsTensor<Complex> *eps = NULL_TENSOR;
-  CTF::bsTensor<Complex> *coulombVertex = NULL_TENSOR;
+  tensor<Complex> *eps = NULL_TENSOR;
+  tensor<Complex> *coulombVertex = NULL_TENSOR;
 
-  CTF::bsTensor<Complex> *epsi = NULL_TENSOR;
-  CTF::bsTensor<Complex> *epsa = NULL_TENSOR;
+  tensor<Complex> *epsi = NULL_TENSOR;
+  tensor<Complex> *epsa = NULL_TENSOR;
 
-  CTF::bsTensor<Complex> *hhVertex = NULL_TENSOR;
-  CTF::bsTensor<Complex> *phVertex = NULL_TENSOR;
-  CTF::bsTensor<Complex> *hpVertex = NULL_TENSOR;
-  CTF::bsTensor<Complex> *ppVertex = NULL_TENSOR;
+  tensor<Complex> *hhVertex = NULL_TENSOR;
+  tensor<Complex> *phVertex = NULL_TENSOR;
+  tensor<Complex> *hpVertex = NULL_TENSOR;
+  tensor<Complex> *ppVertex = NULL_TENSOR;
 
-  CTF::bsTensor<Complex> *Vhhhh = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vhhhp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vhhph = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vhhpp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vhphp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vhppp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vphhh = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vphhp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vphph = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vphpp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vpphh = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vpphp = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vppph = NULL_TENSOR;
-  CTF::bsTensor<Complex> *Vpppp = NULL_TENSOR;
+  tensor<Complex> *Vhhhh = NULL_TENSOR;
+  tensor<Complex> *Vhhhp = NULL_TENSOR;
+  tensor<Complex> *Vhhph = NULL_TENSOR;
+  tensor<Complex> *Vhhpp = NULL_TENSOR;
+  tensor<Complex> *Vhphp = NULL_TENSOR;
+  tensor<Complex> *Vhppp = NULL_TENSOR;
+  tensor<Complex> *Vphhh = NULL_TENSOR;
+  tensor<Complex> *Vphhp = NULL_TENSOR;
+  tensor<Complex> *Vphph = NULL_TENSOR;
+  tensor<Complex> *Vphpp = NULL_TENSOR;
+  tensor<Complex> *Vpphh = NULL_TENSOR;
+  tensor<Complex> *Vpphp = NULL_TENSOR;
+  tensor<Complex> *Vppph = NULL_TENSOR;
+  tensor<Complex> *Vpppp = NULL_TENSOR;
 
 
 

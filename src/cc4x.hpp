@@ -10,6 +10,7 @@ class cc4x {
    static bool complexT;
    static int No;
    static int Nv;
+   static int iterations;
    static CTF::World *dw;
    static kMesh *kmesh;
 };

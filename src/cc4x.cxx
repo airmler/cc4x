@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include <ctf.hpp>
+#include <CLI11.hpp>
 
 #include <cc4x.hpp>
 #include <Read.hpp>
@@ -20,6 +21,7 @@ bool cc4x::verbose = 0;
 bool cc4x::complexT;
 int cc4x::No;
 int cc4x::Nv;
+int cc4x::iterations;
 CTF::World * cc4x::dw = NULL;
 kMesh * cc4x::kmesh = NULL;
 
@@ -33,9 +35,32 @@ void printSystem(){
 
 int main(int argc, char **argv){
   MPI_Init(&argc, &argv);
+  std::string usage("cc4x: Either provide rs && No && Nv\n");
+  usage += "      or provide CoulombVertex.yaml\n";
+  usage += "      and EigenEnergies.yaml in the current directory\n";
+  CLI::App app{usage};
+  double rs(-1.0);
+  bool drccd(false);
+  bool ccsd(true);
+  app.add_option("-o, --occupied", cc4x::No
+                , "Number of occupied orbitals\n")->default_val(0);
+  app.add_option("-v, --virtuals"
+                , cc4x::Nv, "Number of virtual  orbitals\n")->default_val(0);
+  app.add_option("-r, --wignerSeitz"
+                , rs, "Wigner-Seitz radius\n")->default_val(rs);
+  app.add_flag("-d, --drccd", drccd, "Calculate drccd amplitude equations\n");
+  app.add_flag("-c, --ccsd", ccsd, "Calculate ccsd amplitude equations\n");
+  app.add_option("-i, --iterations", cc4x::iterations
+                , "Number of SCF iterations\n")->default_val(10);
+  try {
+    CLI11_PARSE(app, argc, argv);
+  } catch(const CLI::ParseError &e) {
+    int retval = app.exit(e);
+    MPI_Finalize();
+    return retval;
+  }
 
 
-  //cc4x::dw = new CTF::World("normal", 72);
   cc4x::dw = new CTF::World();
 
   tensor<Complex> *eps = NULL_TENSOR;
@@ -67,21 +92,26 @@ int main(int argc, char **argv){
 
 
   try {
-//    Read::getAmplitudesType("CoulombVertex.yaml");
-//    {
-//      LOG() << "read eigen" << std::endl;
-//      Read::input in({"EigenEnergies.yaml"});
-//      Read::output out({&eps});
-//      Read::run(in, out);
-//    }
-//    {
-//      LOG() << "read coulomb" << std::endl;
-//      Read::input in({"CoulombVertex.yaml"});
-//      Read::output out({&coulombVertex});
-//      Read::run(in, out);
-//    }
+    if (rs < 0){
+      Read::getAmplitudesType("CoulombVertex.yaml");
+      {
+        LOG() << "read eigen" << std::endl;
+        Read::input in({"EigenEnergies.yaml"});
+        Read::output out({&eps});
+        Read::run(in, out);
+      }
+      {
+        LOG() << "read coulomb" << std::endl;
+        Read::input in({"CoulombVertex.yaml"});
+        Read::output out({&coulombVertex});
+        Read::run(in, out);
+      }
+    } else
     {
-      Ueg::input in({7, 26, 1.0});
+      if (cc4x::No == 0 || cc4x::Nv == 0) {
+        THROW("Setting rs > 0 requires specification of No && Nv");
+      }
+      Ueg::input in({cc4x::No, cc4x::Nv, rs});
       Ueg::output out({&coulombVertex, &eps});
       Ueg::run(in, out);
     }
@@ -104,12 +134,14 @@ int main(int argc, char **argv){
       Integrals::output out({&Vhhhh, &Vhhhp, &Vhhph, &Vhhpp, &Vhphp, &Vhppp, &Vphhh, &Vphhp, &Vphph, &Vphpp, &Vpphh, &Vpphp, &Vppph, &Vpppp});
       Integrals::run(in, out);
     }
+    if (drccd)
     {
       LOG() << "drccd" << std::endl;
       Drccd::input in({Vpphh, Vphhp, Vhhpp, epsi, epsa});
       Drccd::output out({});
       Drccd::run(in, out);
     }
+    if (ccsd)
     {
       LOG() << "ccsd" << std::endl;
       Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vhphp, Vhppp, Vphhh, Vphhp, Vphph, Vphpp, Vpphh, Vpphp, Vppph, Vpppp, epsi, epsa});

@@ -39,6 +39,9 @@ namespace Ueg{
   void run(input const& in, output& out){
     auto No(in.No), Nv(in.Nv), Np(No+Nv);
     auto rs(in.rs);
+    cc4x::No = No;
+    cc4x::Nv = Nv;
+    cc4x::complexT = true;
     cc4x::kmesh = new kMesh({1,1,1});
     int64_t maxG = std::pow(5.0*Np,1.0/3.0);
     std::vector<iarr> iGrid;
@@ -79,9 +82,11 @@ namespace Ueg{
       refE += 0.5*sL(dGrid[o]);
     }
   
+    LOG() << "Hartree Fock energy: " << refE/No/2 << " Ha per electron\n";
+    LOG() << "HOMO: " << dGrid[No-1][3] << " , LUMO: " << dGrid[No][3] << '\n';
     // work on the eigen energies  
     std::vector<Complex> energies(Np);
-    auto eps = new CTF::bsTensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::dw);
+    auto eps = new tensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::dw, "eps");
 
     for (int64_t d(0); d < Np; d++)
       energies[d] = {dGrid[d][3], 0.0};
@@ -119,7 +124,7 @@ namespace Ueg{
     }
     int64_t NF = momMap.size();
   
-    auto cV = new CTF::bsTensor<Complex>(3, {NF,Np,Np}, cc4x::kmesh->getNZC(3), cc4x::dw);
+    auto cV = new tensor<Complex>(3, {NF,Np,Np}, cc4x::kmesh->getNZC(3), cc4x::dw, "cVertex");
 
 
     // Writing CoulombVertex to buffer 

@@ -13,8 +13,8 @@ namespace Ueg {
     double rs;
   };
   struct output {
-    CTF::bsTensor<Complex> **coulombVertex;
-    CTF::bsTensor<Complex> **eps;
+    tensor<Complex> **coulombVertex;
+    tensor<Complex> **eps;
   };
   void run(input const& in, output &out);
 

@@ -6,7 +6,8 @@
 namespace Ccsd{
 
   void run(input const& in, output& out){
-    size_t maxIter(5);
+    Timings chrono;
+    chrono["ccsd"].start();
     // sanity checks
     if ( in.Vhhhh == NULL || in.Vhhhh == (tensor<Complex>*)0xfafa
       || in.Vhhhp == NULL || in.Vhhhp == (tensor<Complex>*)0xfafa
@@ -60,13 +61,15 @@ namespace Ccsd{
 
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
-    for (size_t i(0); i < maxIter; i++){
+    cc4x::chrono["ccsd"].start();
+    for (size_t i(0); i < cc4x::iterations; i++){
       Xabij.contract(1.0, Tai, "ai", Tai, "bj", 0.0, "abij");
       Xabij.sum(1.0, Tabij, "abij", 1.0, "abij");
       Yabij.contract(2.0, Tai, "ai", Tai, "bj", 0.0, "abij");
       Yabij.sum(1.0, Tabij, "abij", 1.0, "abij");
 
       // add kappa and lambda contributions
+      chrono["ccsd - laka"].start();
       Kac.contract(-2.0, *in.Vhhpp, "klcd", Xabij, "adkl", 0.0, "ac");
       Kac.contract( 1.0, *in.Vhhpp, "kldc", Xabij, "adkl", 1.0, "ac");
       Lac.sum(1.0, Kac, "ac", 0.0, "ac");
@@ -81,15 +84,19 @@ namespace Ccsd{
 
       Rabij.contract( 1.0, Lac, "ac", Tabij, "cbij", 0.0, "abij");
       Rabij.contract(-1.0, Lki, "ki", Tabij, "abkj", 1.0, "abij");
+      chrono["ccsd - laka"].stop();
 
       // add T1 -> R2 contributions
+      chrono["ccsd - t1r2"].start();
       Xakij.sum(1.0, *in.Vphhh, "akij", 0.0, "akij");
       Xakij.contract(1.0, *in.Vphhp, "akic", Tai, "cj", 1.0, "akij");
       Rabij.contract(-1.0, Xakij, "akij", Tai, "bk", 1.0, "abij");
       Xabic.sum(1.0, *in.Vpphp, "abic", 0.0, "abic");
       Xabic.contract(-1.0, *in.Vhphp, "kbic", Tai, "ak", 1.0, "abic");
       Rabij.contract(1.0, Xabic, "abic", Tai, "cj", 1.0, "abij");
+      chrono["ccsd - t1r2"].stop();
       // Xakic
+      chrono["ccsd - akic"].start();
       Xakic.sum(1.0, *in.Vphhp, "akic", 0.0, "akic");
       Xakic.contract(-1.0, *in.Vhhhp, "lkic", Tai, "al", 1.0, "akic");
       Xakic.contract( 1.0, *in.Vphpp, "akdc", Tai, "di", 1.0, "akic");
@@ -98,33 +105,40 @@ namespace Ccsd{
       Xakic.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
       Rabij.contract( 2.0, Xakic, "akic", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakic, "akic", Tabij, "bckj", 1.0, "abij");
+      chrono["ccsd - akic"].stop();
 
       // Xakci
+      chrono["ccsd - akci"].start();
       Xakci.sum(1.0, *in.Vphph, "akci", 0.0, "akci");
       Xakci.contract(-1.0, *in.Vhhph, "lkci", Tai, "al", 1.0, "akci");
       Xakci.contract( 1.0, *in.Vphpp, "akcd", Tai, "di", 1.0, "akci");
       Xakci.contract(-0.5, *in.Vhhpp, "lkcd", Yabij, "dail", 1.0, "akci");
       Rabij.contract(-1.0, Xakci, "akci", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakci, "bkci", Tabij, "ackj", 1.0, "abij");
+      chrono["ccsd - akci"].stop();
 
       // Permutation and add V
       Rabij.sum(1.0, Rabij, "abij", 1.0, "baji");
       Rabij.sum(1.0, *in.Vpphh, "abij", 1.0, "abij");
 
       // Xabcd
+      chrono["ccsd - pp-ladder"].start();
       Xabcd.contract(-1.0, *in.Vphpp, "akcd", Tai, "bk", 0.0, "abcd");
       Xabcd.contract(-1.0, *in.Vhppp, "kbcd", Tai, "ak", 1.0, "abcd");
       Xabcd.sum(1.0, *in.Vpppp, "abcd", 1.0, "abcd");
       Rabij.contract(1.0, Xabcd, "abcd", Xabij, "cdij", 1.0, "abij");
+      chrono["ccsd - pp-ladder"].stop();
 
       // Xijkl
+      chrono["ccsd - hh-ladder"].start();
       Xklij.sum(1.0, *in.Vhhhh, "klij", 0.0, "klij");
       Xklij.contract(1.0, *in.Vhhhp, "klic", Tai, "cj", 1.0, "klij");
       Xklij.contract(1.0, *in.Vhhph, "klcj", Tai, "ci", 1.0, "klij");
       Xklij.contract(1.0, *in.Vhhpp, "klcd", Xabij, "cdij", 1.0, "klij");
       Rabij.contract(1.0, Xklij, "klij", Xabij, "abkl", 1.0, "abij");
-
+      chrono["ccsd - hh-ladder"].stop();
       // Singles contribution
+      chrono["ccsd - singles"].start();
       Rai.contract( 1.0, Kac, "ac", Tai, "ci", 0.0, "ai");
       Rai.contract(-1.0, Kki, "ki", Tai, "ak", 1.0, "ai");
 
@@ -144,6 +158,7 @@ namespace Ccsd{
 
       Rai.contract(-2.0, *in.Vhhhp, "klic", Xabij, "ackl", 1.0, "ai");
       Rai.contract( 1.0, *in.Vhhhp, "lkic", Xabij, "ackl", 1.0, "ai");
+      chrono["ccsd - singles"].stop();
 
       // add energy denominator
       Tai.contract(1.0, Dai, "ai", Rai, "ai", 0.0, "ai");
@@ -153,8 +168,15 @@ namespace Ccsd{
       Xabij.sum(1.0, Tabij, "abij", 1.0, "abij");
       Scf::evalEnergy(Xabij, *in.Vhhpp);
     }
+    cc4x::chrono["ccsd"].stop();
 
+    LOG() << cc4x::chrono["ccsd"].count() << '\n';
     Scf::evalEnergy(Xabij, *in.Vhhpp, "Ccsd");
+
+    chrono["ccsd"].stop();
+    for (auto t: chrono)
+      LOG() << t.first << " " << t.second.count() << "\n";
+
     return;
   }
 

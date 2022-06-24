@@ -6,6 +6,12 @@
 #include <Tensor.hpp>
 #include <iomanip>
 #include <yaml-cpp/yaml.h>
+#include <chrono>
+#include <map>
+
+#ifndef UTIL_DEFINED
+#define UTIL_DEFINED
+
 
 using ivec = std::vector<int>;
 using i64vec = std::vector<int64_t>;
@@ -15,3 +21,17 @@ using Complex = std::complex<double>;
 
 #define LOG() if (!cc4x::dw->rank) std::cout << std::setprecision(8)
 
+struct Timer {
+  using Clock = std::chrono::high_resolution_clock;
+  using Event = std::chrono::time_point<Clock>;
+  std::chrono::duration<double> duration;
+  Event _start;
+  inline void start() noexcept { _start = Clock::now(); }
+  inline void stop() noexcept { duration += Clock::now() - _start; }
+  inline void clear() noexcept { duration *= 0; }
+  inline double count() const noexcept { return duration.count(); }
+};
+using Timings = std::map<std::string, Timer>;
+
+
+#endif

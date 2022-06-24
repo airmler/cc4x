@@ -20,6 +20,7 @@ namespace Integrals{
   }
 
   void run(input const& in, output& out){
+    Timings chrono;
     // sanity checks
     if ( in.pp == NULL || in.pp == (tensor<Complex>*)0xfafa
       || in.ph == NULL || in.ph == (tensor<Complex>*)0xfafa
@@ -45,19 +46,24 @@ namespace Integrals{
     // sorting like that introduces a flip from ia->ai of the nonZeroConditions
     std::sort(flip.begin(), flip.end(), compare({1,2,0}));
 
+    chrono["Integrals - pre"].start();
     conjGhp.sum(1.0, *in.ph, "Gai", 0.0, "Gia", in.ph->nonZeroCondition, flip, fConj);
     conjGph.sum(1.0, *in.hp, "Gia", 0.0, "Gai", in.hp->nonZeroCondition, flip, fConj);
     conjGhh.sum(1.0, *in.hh, "Gia", 0.0, "Gai", in.hh->nonZeroCondition, flip, fConj);
     conjGpp.sum(1.0, *in.pp, "Gia", 0.0, "Gai", in.pp->nonZeroCondition, flip, fConj);
+    chrono["Integrals - pre"].stop();
     int64_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto Vpphh = new tensor<Complex>(4, {p,p,h,h}, nzc4, cc4x::dw, "Vpphh");
     auto Vphhp = new tensor<Complex>(4, {p,h,h,p}, nzc4, cc4x::dw, "Vphhp");
     auto Vhhpp = new tensor<Complex>(4, {h,h,p,p}, nzc4, cc4x::dw, "Vhhpp");
 
+    chrono["Integrals - Ccsd"].start();
+    chrono["Integrals - Drccd"].start();
     Vpphh->contract(1.0, conjGph, "Gai", *in.ph, "Gbj", 0.0, "abij");
     Vphhp->contract(1.0, conjGph, "Gaj", *in.hp, "Gib", 0.0, "aijb");
     Vhhpp->contract(1.0, conjGhp, "Gia", *in.hp, "Gjb", 0.0, "ijab");
+    chrono["Integrals - Drccd"].stop();
 
     *out.Vpphh = Vpphh;
     *out.Vphhp = Vphhp;
@@ -85,7 +91,14 @@ namespace Integrals{
     Vphpp->contract(1.0, conjGpp, "Gia", *in.hp, "Gjb", 0.0, "ijab");
     Vpphp->contract(1.0, conjGph, "Gai", *in.pp, "Gbj", 0.0, "abij");
     Vppph->contract(1.0, conjGpp, "Gai", *in.ph, "Gbj", 0.0, "abij");
+    chrono["Integrals - pppp"].start();
     Vpppp->contract(1.0, conjGpp, "Gaj", *in.pp, "Gib", 0.0, "aijb");
+    chrono["Integrals - Ccsd"].stop();
+    chrono["Integrals - pppp"].stop();
+
+
+    for (auto t: chrono)
+      LOG() << t.first << " " << t.second.count() << "\n";
 
     *out.Vhhhh = Vhhhh;
     *out.Vhhhp = Vhhhp;

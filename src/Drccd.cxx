@@ -7,7 +7,6 @@ namespace Drccd{
 
   void run(input const& in, output& out){
     bool linearized(false);
-    size_t maxIter(20);
     // sanity checks
     if ( in.Vpphh == NULL || in.Vpphh == (tensor<Complex>*)0xfafa
       || in.Vphhp == NULL || in.Vphhp == (tensor<Complex>*)0xfafa
@@ -32,7 +31,7 @@ namespace Drccd{
 
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
-    for (size_t i(0); i < maxIter; i++){
+    for (size_t i(0); i < cc4x::iterations; i++){
       Rabij.sum(1.0, *in.Vpphh, "abij", 0.0, "abij");
       Rabij.contract(2.0, *in.Vphhp, "akic", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(2.0, *in.Vphhp, "bkjc", Tabij, "acik", 1.0, "abij");

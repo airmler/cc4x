@@ -21,6 +21,7 @@ using Complex = std::complex<double>;
 
 #define LOG() if (!cc4x::dw->rank) std::cout << std::setprecision(8)
 
+// taken from Atrip code of AGallo
 struct Timer {
   using Clock = std::chrono::high_resolution_clock;
   using Event = std::chrono::time_point<Clock>;

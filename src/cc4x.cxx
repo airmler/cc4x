@@ -11,6 +11,7 @@
 #include <Integrals.hpp>
 #include <Drccd.hpp>
 #include <Ccsd.hpp>
+#include <CcsdRef.hpp>
 #include <Ueg.hpp>
 
 // this is a insane hack.once in the lifetime of the universe, we will fail
@@ -19,8 +20,12 @@
 
 bool cc4x::verbose = 0;
 bool cc4x::complexT;
+bool cc4x::drccd;
+bool cc4x::ccsd;
+bool cc4x::ref;
 int cc4x::No;
 int cc4x::Nv;
+int cc4x::Nx;
 int cc4x::iterations;
 CTF::World * cc4x::dw = NULL;
 kMesh * cc4x::kmesh = NULL;
@@ -40,18 +45,22 @@ int main(int argc, char **argv){
   usage += "      and EigenEnergies.yaml in the current directory\n";
   CLI::App app{usage};
   double rs(-1.0);
-  bool drccd(false);
-  bool ccsd(true);
   app.add_option("-o, --occupied", cc4x::No
-                , "Number of occupied orbitals\n")->default_val(0);
+                , "Number of occupied orbitals")->default_val(0);
   app.add_option("-v, --virtuals"
-                , cc4x::Nv, "Number of virtual  orbitals\n")->default_val(0);
+                , cc4x::Nv, "Number of virtual  orbitals")->default_val(0);
   app.add_option("-r, --wignerSeitz"
-                , rs, "Wigner-Seitz radius\n")->default_val(rs);
-  app.add_flag("-d, --drccd", drccd, "Calculate drccd amplitude equations\n");
-  app.add_flag("-c, --ccsd", ccsd, "Calculate ccsd amplitude equations\n");
+                , rs, "Wigner-Seitz radius")->default_val(rs);
+  app.add_flag("-d, --drccd", cc4x::drccd
+              , "Calculate drccd amplitude equations")->default_val(false);
+  app.add_flag("-c, --ccsd", cc4x::ccsd
+              , "Calculate ccsd amplitude equations")->default_val(true);
+  app.add_flag("-f, --ref", cc4x::ref
+              , "Using ccsd reference implementiation")->default_val(false);
+  app.add_option("-x, --Nx", cc4x::Nx
+                , "Dimension of ppl slice size")->default_val(-1);
   app.add_option("-i, --iterations", cc4x::iterations
-                , "Number of SCF iterations\n")->default_val(10);
+                , "Number of SCF iterations")->default_val(10);
   try {
     CLI11_PARSE(app, argc, argv);
   } catch(const CLI::ParseError &e) {
@@ -59,7 +68,6 @@ int main(int argc, char **argv){
     MPI_Finalize();
     return retval;
   }
-
 
   cc4x::dw = new CTF::World();
 
@@ -134,17 +142,25 @@ int main(int argc, char **argv){
       Integrals::output out({&Vhhhh, &Vhhhp, &Vhhph, &Vhhpp, &Vhphp, &Vhppp, &Vphhh, &Vphhp, &Vphph, &Vphpp, &Vpphh, &Vpphp, &Vppph, &Vpppp});
       Integrals::run(in, out);
     }
-    if (drccd)
+    if (cc4x::drccd)
     {
       LOG() << "drccd" << std::endl;
       Drccd::input in({Vpphh, Vphhp, Vhhpp, epsi, epsa});
       Drccd::output out({});
       Drccd::run(in, out);
     }
-    if (ccsd)
+    if (cc4x::ccsd && cc4x::ref)
     {
+      LOG() << "ccsdRef" << std::endl;
+      CcsdRef::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vhphp, Vhppp, Vphhh, Vphhp, Vphph, Vphpp, Vpphh, Vpphp, Vppph, Vpppp, epsi, epsa});
+      CcsdRef::output out({});
+      CcsdRef::run(in, out);
+    }
+    if (cc4x::ccsd && !cc4x::ref)
+    {
+      if (cc4x::Nx <= 0) cc4x::Nx = cc4x::No;
       LOG() << "ccsd" << std::endl;
-      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vhphp, Vhppp, Vphhh, Vphhp, Vphph, Vphpp, Vpphh, Vpphp, Vppph, Vpppp, epsi, epsa});
+      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
       Ccsd::output out({});
       Ccsd::run(in, out);
     }

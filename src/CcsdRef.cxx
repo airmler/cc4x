@@ -1,10 +1,9 @@
-#include "Ccsd.hpp"
+#include "CcsdRef.hpp"
 #include "Util.hpp"
 #include "Scf.hpp"
 #include "cc4x.hpp"
 
-namespace Ccsd{
-  Complex conjo(Complex x){ return std::conj(x); }
+namespace CcsdRef{
 
   void run(input const& in, output& out){
     Timings chrono;
@@ -14,31 +13,25 @@ namespace Ccsd{
       || in.Vhhhp == NULL    || in.Vhhhp == (tensor<Complex>*)0xfafa
       || in.Vhhph == NULL    || in.Vhhph == (tensor<Complex>*)0xfafa
       || in.Vhhpp == NULL    || in.Vhhpp == (tensor<Complex>*)0xfafa
-      || in.Vphhh == NULL    || in.Vphhh == (tensor<Complex>*)0xfafa
+      || in.Vhppp == NULL    || in.Vhppp == (tensor<Complex>*)0xfafa
       || in.Vphhp == NULL    || in.Vphhp == (tensor<Complex>*)0xfafa
       || in.Vphph == NULL    || in.Vphph == (tensor<Complex>*)0xfafa
+      || in.Vphpp == NULL    || in.Vphpp == (tensor<Complex>*)0xfafa
       || in.Vpphh == NULL    || in.Vpphh == (tensor<Complex>*)0xfafa
+      || in.Vppph == NULL    || in.Vppph == (tensor<Complex>*)0xfafa
+      || in.Vpppp == NULL    || in.Vpppp == (tensor<Complex>*)0xfafa
       || in.epsi ==  NULL    || in.epsi  == (tensor<Complex>*)0xfafa
       || in.epsa ==  NULL    || in.epsa  == (tensor<Complex>*)0xfafa
-      || in.hhVertex == NULL || in.hhVertex == (tensor<Complex>*)0xfafa
-      || in.phVertex == NULL || in.phVertex == (tensor<Complex>*)0xfafa
-      || in.hpVertex == NULL || in.hpVertex == (tensor<Complex>*)0xfafa
-      || in.ppVertex == NULL || in.ppVertex == (tensor<Complex>*)0xfafa
        ) {
-      THROW("Input of Ccsd not valid");
+      THROW("Input of CcsdRef not valid");
     }
 
-		int64_t h(cc4x::No), p(cc4x::Nv), g(in.ppVertex->lens[0]);
+		int64_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto nzc3(cc4x::kmesh->getNZC(3));
     auto nzc2(cc4x::kmesh->getNZC(2));
     auto nzc1(cc4x::kmesh->getNZC(1));
 
-
-    tensor<Complex> cThhVertex(3, {g,h,h}, nzc3, cc4x::dw, "cTGhh");
-    tensor<Complex> cTphVertex(3, {g,p,h}, nzc3, cc4x::dw, "cTGph");
-    tensor<Complex> cThpVertex(3, {g,h,p}, nzc3, cc4x::dw, "cTGhp");
-    tensor<Complex> cTppVertex(3, {g,p,p}, nzc3, cc4x::dw, "cTGpp");
 
     tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
     tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
@@ -62,18 +55,6 @@ namespace Ccsd{
     tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
     tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
 
-    tensor<Complex> Ghh(3, {g,h,h}, nzc3, cc4x::dw, "Ghh");
-    tensor<Complex> Gph(3, {g,p,h}, nzc3, cc4x::dw, "Gph");
-    tensor<Complex> Ghp(3, {g,h,p}, nzc3, cc4x::dw, "Ghp");
-    tensor<Complex> Gpp(3, {g,p,p}, nzc3, cc4x::dw, "Gpp");
-    tensor<Complex> G(1, {g}, nzc1, cc4x::dw, "G");
-
-    std::function<Complex(const Complex)> fConj(&conjo);
-    cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", fConj);
-    cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", fConj);
-    cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", fConj);
-    cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", fConj);
-
     Scf::getDai(Dai, *in.epsi, *in.epsa);
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
 
@@ -93,11 +74,8 @@ namespace Ccsd{
       Kac.contract( 1.0, *in.Vhhpp, "kldc", Xabij, "adkl", 1.0, "ac");
       Lac.sum(1.0, Kac, "ac", 0.0, "ac");
 
-      G.contract(1.0,   *in.hpVertex, "Gkd", Tai, "dk", 0.0, "G");
-      Lac.contract(2.0, cTppVertex, "Gac", G, "G", 1.0, "ac");
-      Gpp.contract(1.0, *in.hpVertex, "Gkc", Tai, "dk", 0.0, "Gcd");
-      Lac.contract(-1., *in.ppVertex, "Gad", Gpp, "Gcd", 1.0, "ac");
-
+      Lac.contract( 2.0, *in.Vphpp, "akcd", Tai, "dk", 1.0, "ac");
+      Lac.contract(-1.0, *in.Vphpp, "akdc", Tai, "dk", 1.0, "ac");
       Kki.contract( 2.0, *in.Vhhpp, "klcd", Xabij, "cdil", 0.0, "ki");
       Kki.contract(-1.0, *in.Vhhpp, "kldc", Xabij, "cdil", 1.0, "ki");
       Lki.sum(1.0, Kki, "ki", 0.0, "ki");
@@ -113,32 +91,28 @@ namespace Ccsd{
       Xakij.sum(1.0, *in.Vphhh, "akij", 0.0, "akij");
       Xakij.contract(1.0, *in.Vphhp, "akic", Tai, "cj", 1.0, "akij");
       Rabij.contract(-1.0, Xakij, "akij", Tai, "bk", 1.0, "abij");
-      Gph.sum(1.0, cTphVertex, "Gai", 0.0, "Gai");
-      Gph.contract(-1.0, cThhVertex, "Gki", Tai, "ak", 1.0, "Gai");
-      Ghp.contract(1.0, *in.ppVertex, "Gbc", Tai, "cj", 0.0, "Gjb");
-      Rabij.contract(1.0, Gph, "Gai", Ghp, "Gjb", 1.0, "abij");
+      Xabic.sum(1.0, *in.Vpphp, "abic", 0.0, "abic");
+      Xabic.contract(-1.0, *in.Vhphp, "kbic", Tai, "ak", 1.0, "abic");
+      Rabij.contract(1.0, Xabic, "abic", Tai, "cj", 1.0, "abij");
       chrono["ccsd - t1r2"].stop();
       // Xakic
       chrono["ccsd - akic"].start();
-      Gph.contract( 1.0, cTppVertex, "Gad", Tai, "di", 1.0, "Gai");
-      Gph.contract(-0.5, cThpVertex, "Gld", Yabij, "dail", 1.0, "Gai");
-      Xakic.contract(1.0, Gph, "Gai", *in.hpVertex, "Gkc", 0.0, "akic");
-      Yabij.sum( 1.0, *in.Vhhpp, "lkdc", 0.0, "dclk");
-      Yabij.sum(-0.5, *in.Vhhpp, "lkcd", 1.0, "dclk");
-      Xakic.contract(1.0, Yabij, "dclk", Tabij, "adil", 1.0, "akic");
-      Yabij.sum( 2.0, Tabij, "cbkj", 0.0, "cbkj");
-      Yabij.sum(-1.0, Tabij, "bckj", 1.0, "cbkj");
-      Rabij.contract(1.0, Xakic, "akic", Yabij, "cbkj", 1.0, "abij");
+      Xakic.sum(1.0, *in.Vphhp, "akic", 0.0, "akic");
+      Xakic.contract(-1.0, *in.Vhhhp, "lkic", Tai, "al", 1.0, "akic");
+      Xakic.contract( 1.0, *in.Vphpp, "akdc", Tai, "di", 1.0, "akic");
+      Xakic.contract(-0.5, *in.Vhhpp, "lkdc", Yabij, "dail", 1.0, "akic");
+      Xakic.contract( 1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
+      Xakic.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
+      Rabij.contract( 2.0, Xakic, "akic", Tabij, "cbkj", 1.0, "abij");
+      Rabij.contract(-1.0, Xakic, "akic", Tabij, "bckj", 1.0, "abij");
       chrono["ccsd - akic"].stop();
 
       // Xakci
       chrono["ccsd - akci"].start();
-      Gpp.sum(1.0, cTppVertex, "Gab", 0.0, "Gab");
-      Gpp.contract(-1.0, cThpVertex, "Glc", Tai, "al", 1.0, "Gac");
-      Ghh.sum(1.0, *in.hhVertex, "Gij", 0.0, "Gij");
-      Ghh.contract(1.0, *in.hpVertex, "Gkd", Tai, "di", 1.0, "Gki");
-      Xakci.contract( 1.0, Gpp, "Gac", Ghh, "Gki", 0.0, "akci");
-      Xakci.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "dail", 1.0, "akci");
+      Xakci.sum(1.0, *in.Vphph, "akci", 0.0, "akci");
+      Xakci.contract(-1.0, *in.Vhhph, "lkci", Tai, "al", 1.0, "akci");
+      Xakci.contract( 1.0, *in.Vphpp, "akcd", Tai, "di", 1.0, "akci");
+      Xakci.contract(-0.5, *in.Vhhpp, "lkcd", Yabij, "dail", 1.0, "akci");
       Rabij.contract(-1.0, Xakci, "akci", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakci, "bkci", Tabij, "ackj", 1.0, "abij");
       chrono["ccsd - akci"].stop();
@@ -149,51 +123,10 @@ namespace Ccsd{
 
       // Xabcd
       chrono["ccsd - pp-ladder"].start();
-      //number of slices
-      int nS(int(std::ceil(1.0*p/cc4x::Nx)));
-      //prepare the dressed vertices in a vector
-      std::vector<tensor<Complex> *> slcTppVertex(nS);
-      std::vector<tensor<Complex> *> slppVertex(nS);
-
-      for (int i(0); i < nS; i++){
-        int iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, (int) p);
-        int y = iEnd - iStart;
-        slcTppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
-
-        slcTppVertex[i]->slice(
-          {0,0,0}, {g,y,p}, 0.0, Gpp, {0,iStart,0}, {g,iEnd,p}, 1.0
-        );
-      }
-      Gpp.sum(1.0, *in.ppVertex, "Gab", 0.0, "Gab");
-      Gpp.contract(-1.0, *in.hpVertex, "Gkb", Tai, "ak", 1.0, "Gab");
-      for (int i(0); i < nS; i++){
-        int iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, (int) p);
-        int y = iEnd - iStart;
-        slppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
-        slppVertex[i]->slice(
-          {0,0,0}, {g,y,p}, 0.0, Gpp, {0,iStart,0}, {g,iEnd,p}, 1.0
-        );
-      }
-      for (int m(0); m < nS; m++)
-      for (int n(m); n < nS; n++){
-        //adapt the size of Vxycd and co
-        int a(n*cc4x::Nx), b(m*cc4x::Nx);
-        int y(slppVertex[m]->lens[1]), x(slcTppVertex[n]->lens[1]);
-        tensor<Complex> Vxycd(4, {x,y,p,p}, nzc4, cc4x::dw, "Vxycd");
-        tensor<Complex> Rxyij(4, {x,y,h,h}, nzc4, cc4x::dw, "Rxyij");
-        tensor<Complex> Ryxji(4, {y,x,h,h}, nzc4, cc4x::dw, "Rxyji");
-        Vxycd.contract(
-          1.0, *slcTppVertex[n], "Gxc", *slppVertex[m], "Gyd", 0.0, "xycd"
-        );
-        Rxyij.contract(1.0, Vxycd, "xycd", Xabij, "cdij", 0.0, "xyij");
-        Rabij.slice({a,b,0,0}, {a+x,b+y,h,h}, 1.0, Rxyij, {0,0,0,0}, {x,y,h,h}, 1.0);
-        if (a > b){
-          Ryxji.sum(1.0, Rxyij, "xyij", 0.0, "yxji");
-          Rabij.slice({b,a,0,0}, {b+y,a+x,h,h}, 1.0, Ryxji, {0,0,0,0}, {x,y,h,h}, 1.0);
-        }
-
-      }
- 
+      Xabcd.contract(-1.0, *in.Vphpp, "akcd", Tai, "bk", 0.0, "abcd");
+      Xabcd.contract(-1.0, *in.Vhppp, "kbcd", Tai, "ak", 1.0, "abcd");
+      Xabcd.sum(1.0, *in.Vpppp, "abcd", 1.0, "abcd");
+      Rabij.contract(1.0, Xabcd, "abcd", Xabij, "cdij", 1.0, "abij");
       chrono["ccsd - pp-ladder"].stop();
 
 
@@ -203,7 +136,7 @@ namespace Ccsd{
       Xklij.contract(1.0, *in.Vhhhp, "klic", Tai, "cj", 1.0, "klij");
       Xklij.contract(1.0, *in.Vhhph, "klcj", Tai, "ci", 1.0, "klij");
       Xklij.contract(1.0, *in.Vhhpp, "klcd", Xabij, "cdij", 1.0, "klij");
-      Rabij.contract(1.0, Xklij, "klij", Tabij, "abkl", 1.0, "abij");
+      Rabij.contract(1.0, Xklij, "klij", Xabij, "abkl", 1.0, "abij");
       chrono["ccsd - hh-ladder"].stop();
 
       // Singles contribution
@@ -222,10 +155,8 @@ namespace Ccsd{
       Rai.contract( 2.0, *in.Vphhp, "akic", Tai, "ck", 1.0, "ai");
       Rai.contract(-1.0, *in.Vphph, "akci", Tai, "ck", 1.0, "ai");
 
-      Gph.contract( 1.0, *in.hpVertex, "Gkd", Xabij, "cdik", 0.0, "Gci");
-      Rai.contract( 2.0, cTppVertex, "Gac", Gph, "Gci", 1.0, "ai");
-      Gph.contract( 1.0, *in.hpVertex, "Gkc", Xabij, "cdik", 0.0, "Gdi");
-      Rai.contract(-1.0, cTppVertex, "Gad", Gph, "Gdi", 1.0, "ai");
+      Rai.contract( 2.0, *in.Vphpp, "akcd", Xabij, "cdik", 1.0, "ai");
+      Rai.contract(-1.0, *in.Vphpp, "akdc", Xabij, "cdik", 1.0, "ai");
 
       Rai.contract(-2.0, *in.Vhhhp, "klic", Xabij, "ackl", 1.0, "ai");
       Rai.contract( 1.0, *in.Vhhhp, "lkic", Xabij, "ackl", 1.0, "ai");

@@ -3,7 +3,6 @@
 #include <cc4x.hpp>
 
 namespace Integrals{
-
   Complex conjo(Complex x){ return std::conj(x); }
 
   std::function<int(const ivec &, const ivec &)>
@@ -69,49 +68,52 @@ namespace Integrals{
     *out.Vphhp = Vphhp;
     *out.Vhhpp = Vhhpp;
 
-    auto Vhhhh = new tensor<Complex>(4, {h,h,h,h}, nzc4, cc4x::dw, "Vhhhh");
-    auto Vhhhp = new tensor<Complex>(4, {h,h,h,p}, nzc4, cc4x::dw, "Vhhhp");
-    auto Vhhph = new tensor<Complex>(4, {h,h,p,h}, nzc4, cc4x::dw, "Vhhph");
-    auto Vhphp = new tensor<Complex>(4, {h,p,h,p}, nzc4, cc4x::dw, "Vhphp");
-    auto Vhppp = new tensor<Complex>(4, {h,p,p,p}, nzc4, cc4x::dw, "Vhppp");
-    auto Vphhh = new tensor<Complex>(4, {p,h,h,h}, nzc4, cc4x::dw, "Vphhh");
-    auto Vphph = new tensor<Complex>(4, {p,h,p,h}, nzc4, cc4x::dw, "Vphph");
-    auto Vphpp = new tensor<Complex>(4, {p,h,p,p}, nzc4, cc4x::dw, "Vphpp");
-    auto Vppph = new tensor<Complex>(4, {p,p,p,h}, nzc4, cc4x::dw, "Vppph");
-    auto Vpphp = new tensor<Complex>(4, {p,p,h,p}, nzc4, cc4x::dw, "Vpphp");
-    auto Vpppp = new tensor<Complex>(4, {p,p,p,p}, nzc4, cc4x::dw, "Vpppp");
+    if (cc4x::ccsd) {
+      auto Vhhhh = new tensor<Complex>(4, {h,h,h,h}, nzc4, cc4x::dw, "Vhhhh");
+      auto Vhhhp = new tensor<Complex>(4, {h,h,h,p}, nzc4, cc4x::dw, "Vhhhp");
+      auto Vhhph = new tensor<Complex>(4, {h,h,p,h}, nzc4, cc4x::dw, "Vhhph");
+      auto Vhphp = new tensor<Complex>(4, {h,p,h,p}, nzc4, cc4x::dw, "Vhphp");
+      auto Vphhh = new tensor<Complex>(4, {p,h,h,h}, nzc4, cc4x::dw, "Vphhh");
+      auto Vphph = new tensor<Complex>(4, {p,h,p,h}, nzc4, cc4x::dw, "Vphph");
 
-    Vhhhh->contract(1.0, conjGhh, "Gai", *in.hh, "Gbj", 0.0, "abij");
-    Vhhhp->contract(1.0, conjGhh, "Gaj", *in.hp, "Gib", 0.0, "aijb");
-    Vhhph->contract(1.0, conjGhp, "Gia", *in.hh, "Gjb", 0.0, "ijab");
-    Vhphp->contract(1.0, conjGhh, "Gai", *in.pp, "Gbj", 0.0, "abij");
-    Vhppp->contract(1.0, conjGhp, "Gai", *in.pp, "Gbj", 0.0, "abij");
-    Vphhh->contract(1.0, conjGph, "Gaj", *in.hh, "Gib", 0.0, "aijb");
-    Vphph->contract(1.0, conjGpp, "Gaj", *in.hh, "Gib", 0.0, "aijb");
-    Vphpp->contract(1.0, conjGpp, "Gia", *in.hp, "Gjb", 0.0, "ijab");
-    Vpphp->contract(1.0, conjGph, "Gai", *in.pp, "Gbj", 0.0, "abij");
-    Vppph->contract(1.0, conjGpp, "Gai", *in.ph, "Gbj", 0.0, "abij");
-    chrono["Integrals - pppp"].start();
-    Vpppp->contract(1.0, conjGpp, "Gaj", *in.pp, "Gib", 0.0, "aijb");
+      Vhhhh->contract(1.0, conjGhh, "Gai", *in.hh, "Gbj", 0.0, "abij");
+      Vhhhp->contract(1.0, conjGhh, "Gaj", *in.hp, "Gib", 0.0, "aijb");
+      Vhhph->contract(1.0, conjGhp, "Gia", *in.hh, "Gjb", 0.0, "ijab");
+      Vhphp->contract(1.0, conjGhh, "Gai", *in.pp, "Gbj", 0.0, "abij");
+      Vphhh->contract(1.0, conjGph, "Gaj", *in.hh, "Gib", 0.0, "aijb");
+      Vphph->contract(1.0, conjGpp, "Gaj", *in.hh, "Gib", 0.0, "aijb");
+
+      *out.Vhhhh = Vhhhh;
+      *out.Vhhhp = Vhhhp;
+      *out.Vhhph = Vhhph;
+      *out.Vhphp = Vhphp;
+      *out.Vphhh = Vphhh;
+      *out.Vphph = Vphph;
+    }
+    if (cc4x::ref) { 
+      auto Vhppp = new tensor<Complex>(4, {h,p,p,p}, nzc4, cc4x::dw, "Vhppp");
+      auto Vphpp = new tensor<Complex>(4, {p,h,p,p}, nzc4, cc4x::dw, "Vphpp");
+      auto Vpphp = new tensor<Complex>(4, {p,p,h,p}, nzc4, cc4x::dw, "Vpphp");
+      auto Vppph = new tensor<Complex>(4, {p,p,p,h}, nzc4, cc4x::dw, "Vppph");
+      auto Vpppp = new tensor<Complex>(4, {p,p,p,p}, nzc4, cc4x::dw, "Vpppp");
+      Vhppp->contract(1.0, conjGhp, "Gai", *in.pp, "Gbj", 0.0, "abij");
+      Vphpp->contract(1.0, conjGpp, "Gia", *in.hp, "Gjb", 0.0, "ijab");
+      Vpphp->contract(1.0, conjGph, "Gai", *in.pp, "Gbj", 0.0, "abij");
+      Vppph->contract(1.0, conjGpp, "Gai", *in.ph, "Gbj", 0.0, "abij");
+      chrono["Integrals - pppp"].start();
+      Vpppp->contract(1.0, conjGpp, "Gaj", *in.pp, "Gib", 0.0, "aijb");
+      chrono["Integrals - pppp"].stop();
+
+      *out.Vhppp = Vhppp;
+      *out.Vphpp = Vphpp;
+      *out.Vpphp = Vpphp;
+      *out.Vppph = Vppph;
+      *out.Vpppp = Vpppp;
+    }
     chrono["Integrals - Ccsd"].stop();
-    chrono["Integrals - pppp"].stop();
-
 
     for (auto t: chrono)
       LOG() << t.first << " " << t.second.count() << "\n";
-
-    *out.Vhhhh = Vhhhh;
-    *out.Vhhhp = Vhhhp;
-    *out.Vhhph = Vhhph;
-    *out.Vhphp = Vhphp;
-    *out.Vhppp = Vhppp;
-    *out.Vphhh = Vphhh;
-    *out.Vphph = Vphph;
-    *out.Vphpp = Vphpp;
-    *out.Vpphp = Vpphp;
-    *out.Vppph = Vppph;
-    *out.Vpppp = Vpppp;
-
 
 
     return;

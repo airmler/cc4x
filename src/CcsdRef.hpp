@@ -1,25 +1,27 @@
 #include "Util.hpp"
 
-#ifndef CCSD_DEFINED
-#define CCSD_DEFINED
+#ifndef CCSDREF_DEFINED
+#define CCSDREF_DEFINED
 
 
-namespace Ccsd {
+namespace CcsdRef {
   struct input {
     tensor<Complex> *Vhhhh;
     tensor<Complex> *Vhhhp;
     tensor<Complex> *Vhhph;
     tensor<Complex> *Vhhpp;
+    tensor<Complex> *Vhphp;
+    tensor<Complex> *Vhppp;
     tensor<Complex> *Vphhh;
     tensor<Complex> *Vphhp;
     tensor<Complex> *Vphph;
+    tensor<Complex> *Vphpp;
     tensor<Complex> *Vpphh;
+    tensor<Complex> *Vpphp;
+    tensor<Complex> *Vppph;
+    tensor<Complex> *Vpppp;
     tensor<Complex> *epsi;
     tensor<Complex> *epsa;
-    tensor<Complex> *hhVertex;
-    tensor<Complex> *phVertex;
-    tensor<Complex> *hpVertex;
-    tensor<Complex> *ppVertex;
   };
   struct output {
   };

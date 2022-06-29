@@ -193,7 +193,7 @@ namespace Ccsd{
         }
 
       }
- 
+
       chrono["ccsd - pp-ladder"].stop();
 
 
@@ -201,8 +201,9 @@ namespace Ccsd{
       chrono["ccsd - hh-ladder"].start();
       Xklij.sum(1.0, *in.Vhhhh, "klij", 0.0, "klij");
       Xklij.contract(1.0, *in.Vhhhp, "klic", Tai, "cj", 1.0, "klij");
-      Xklij.contract(1.0, *in.Vhhph, "klcj", Tai, "ci", 1.0, "klij");
-      Xklij.contract(1.0, *in.Vhhpp, "klcd", Xabij, "cdij", 1.0, "klij");
+      Xklij.contract(1.0, *in.Vhhhp, "lkjc", Tai, "ci", 1.0, "klij");
+      Rabij.contract(1.0, Xklij, "klij", Xabij, "abkl", 1.0, "abij");
+      Xklij.contract(1.0, *in.Vhhpp, "klcd", Xabij, "cdij", 0.0, "klij");
       Rabij.contract(1.0, Xklij, "klij", Tabij, "abkl", 1.0, "abij");
       chrono["ccsd - hh-ladder"].stop();
 

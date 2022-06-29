@@ -1,42 +1,30 @@
+include ../etc/cc4x.mk
+
 .DEFAULT_GOAL := install
 .PHONY: install clean
 
-BUILD_PATH        = build
+BUILD_PATH        = ../build
 OBJ_PATH          = $(BUILD_PATH)/obj
 BIN_PATH          = $(BUILD_PATH)/bin
 
 SRC := $(wildcard *.cxx)
-OBJ_FILES = $(patsubst %.cxx,%.o,$(SRC))
+OBJ_FILES = $(patsubst %.cxx,$(OBJ_PATH)/%.o,$(SRC))
 
+
+$(info $(SRC))
 clean:
-	rm *.o
-	rm cc4x
-
-CXX=mpic++
-CXXFLAGS := -std=c++11 -g -O0
+	rm -rf $(BUILD_PATH)
 
 
-# BACKENDS
-CXXFLAGS += -DCTFBS_BACKEND
-
-
-CTF_PATH = /home/irmler/uni/kccsd/cc4x/ctf
-YAML_PATH = /home/irmler/uni/kccsd/cc4x/yaml-cpp/build/install
-CXXFLAGS += -I${CTF_PATH}/include
-CXXFLAGS += -I.
-CXXFLAGS += -I${YAML_PATH}/include
-
-LIBS += -L${CTF_PATH}/lib -lctf
-LIBS += -lopenblas -fopenmp
-LIBS += -lyaml-cpp -L${YAML_PATH}/lib
 EXE := cc4x
+install: $(BIN_PATH)/${EXE}
 
-install: ${EXE}
+$(OBJ_PATH)/%.o: %.cxx
+	mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-%.o: %.cxx
-	$(CXX) -c $(CXXFLAGS) $<
-
-${EXE}: ${OBJ_FILES}
+$(BIN_PATH)/${EXE}: ${OBJ_FILES}
+	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) ${OBJ_FILES} ${LIBS} -o $@
 
 

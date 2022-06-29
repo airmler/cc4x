@@ -22,4 +22,8 @@ the work of Morales and co-workers
 [afqmc-ueg](https://aip.scitation.org/doi/pdf/10.1063/1.5109572).  Furthermore,
 the input files from `cc4s` can be used (with tiny modifications in the yaml).
 
+# How to install
 
+Go to the file etc/cc4x.mk and define the ```CTF_PATH``` and ```YAML_PATH```.
+Then go to ```src``` and type ```make```. This build system assumes gcc
+compiler with openmpi and OpenBlas.

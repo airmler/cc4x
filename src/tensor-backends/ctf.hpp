@@ -33,7 +33,8 @@
                tensor     &B,
                char const *idx_B,
                F          beta,
-               char const *idx_C) {
+               char const *idx_C,
+               bool       verbose) {
 
         machine_tensor->contract(alpha,
                                  *A.machine_tensor,

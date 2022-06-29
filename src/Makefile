@@ -11,7 +11,6 @@ SRC := $(wildcard *.cxx)
 OBJ_FILES = $(patsubst %.cxx,$(OBJ_PATH)/%.o,$(SRC))
 
 
-$(info $(SRC))
 clean:
 	rm -rf $(BUILD_PATH)
 

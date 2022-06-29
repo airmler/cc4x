@@ -68,7 +68,7 @@ int main(int argc, char **argv){
     MPI_Finalize();
     return retval;
   }
-
+  if (cc4x::drccd) cc4x::ccsd = false;
   cc4x::dw = new CTF::World();
 
   tensor<Complex> *eps = NULL_TENSOR;

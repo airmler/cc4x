@@ -18,17 +18,16 @@ namespace Scf{
     energy.contract(-1.0, T, "abij", V, "jiab", 0.0, "");
     energy.read_all(&exchange);
     int Nk(cc4x::kmesh->Nk);
-    int N3(Nk*Nk*Nk);
     if (what.size()) LOG() << what << "\n";
-    LOG() << "Energy (d/x): " << real(direct+exchange)/N3;
-    LOG() << " ( " << real(direct)/N3;
-    LOG() << " / " << real(exchange)/N3;
+    LOG() << "Energy (d/x): " << real(direct+exchange)/Nk;
+    LOG() << " ( " << real(direct)/Nk;
+    LOG() << " / " << real(exchange)/Nk;
     LOG() <<  " )" << std::endl;
     if (std::abs(imag(direct)) > 1e-5){
-      LOG() << "\nWarning. direct part is imaginary " << imag(direct)/N3 << '\n';
+      LOG() << "\nWarning. direct part is imaginary " << imag(direct)/Nk << '\n';
     }
     if (std::abs(imag(exchange)) > 1e-5){
-      LOG() << "\nWarning. exchange part is imaginary " << imag(exchange)/N3 << '\n';
+      LOG() << "\nWarning. exchange part is imaginary " << imag(exchange)/Nk << '\n';
     }
   }
 

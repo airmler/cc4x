@@ -136,6 +136,7 @@ int main(int argc, char **argv){
       Slice::output out({&hhVertex, &phVertex, &hpVertex, &ppVertex});
       Slice::run(in, out);
     }
+    delete eps; delete coulombVertex;
     {
       LOG()<< "eval Integrals" << std::endl;
       Integrals::input in({hhVertex, phVertex, hpVertex, ppVertex});
@@ -159,7 +160,7 @@ int main(int argc, char **argv){
     if (cc4x::ccsd && !cc4x::ref)
     {
       if (cc4x::Nx <= 0) cc4x::Nx = cc4x::No;
-      LOG() << "ccsd" << std::endl;
+      LOG() << "ccsd with slice size " << cc4x::Nx << std::endl;
       Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
       Ccsd::output out({});
       Ccsd::run(in, out);

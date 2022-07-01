@@ -35,25 +35,27 @@ namespace CcsdRef{
 
     tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
     tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
-    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
     tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::dw, "Tai");
     tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
-
 
     tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::dw, "Kac");
     tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::dw, "Kki");
     tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::dw, "Lac");
     tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::dw, "Lki");
     tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::dw, "Kck");
-    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
-    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
     tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::dw, "Xakic");
     tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::dw, "Xakci");
     tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::dw, "Xklij");
     tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::dw, "Xabij");
     tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
     tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
+
+    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
+    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
+    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
+    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Kabij");
+
 
     Scf::getDai(Dai, *in.epsi, *in.epsa);
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
@@ -63,10 +65,10 @@ namespace CcsdRef{
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
     for (size_t i(0); i < cc4x::iterations; i++){
-      Xabij.contract(1.0, Tai, "ai", Tai, "bj", 0.0, "abij");
-      Xabij.sum(1.0, Tabij, "abij", 1.0, "abij");
-      Yabij.contract(2.0, Tai, "ai", Tai, "bj", 0.0, "abij");
-      Yabij.sum(1.0, Tabij, "abij", 1.0, "abij");
+      Xabij.sum(1.0, Tabij, "abij", 0.0, "abij");
+      Xabij.contract(1.0, Tai, "ai", Tai, "bj", 1.0, "abij");
+      Yabij.sum(1.0, Tabij, "abij", 0.0, "abij");
+      Yabij.contract(2.0, Tai, "ai", Tai, "bj", 1.0, "abij");
 
       // add kappa and lambda contributions
       chrono["ccsd - laka"].start();
@@ -118,14 +120,15 @@ namespace CcsdRef{
       chrono["ccsd - akci"].stop();
 
       // Permutation and add V
-      Rabij.sum(1.0, Rabij, "abij", 1.0, "baji");
+      Kabij.sum(1.0, Rabij, "abij", 0.0, "baji");
+      Rabij.sum(1.0, Kabij, "abij", 1.0, "abij");
       Rabij.sum(1.0, *in.Vpphh, "abij", 1.0, "abij");
 
       // Xabcd
       chrono["ccsd - pp-ladder"].start();
-      Xabcd.contract(-1.0, *in.Vphpp, "akcd", Tai, "bk", 0.0, "abcd");
+      Xabcd.sum(1.0, *in.Vpppp, "abcd", 0.0, "abcd");
+      Xabcd.contract(-1.0, *in.Vphpp, "akcd", Tai, "bk", 1.0, "abcd");
       Xabcd.contract(-1.0, *in.Vhppp, "kbcd", Tai, "ak", 1.0, "abcd");
-      Xabcd.sum(1.0, *in.Vpppp, "abcd", 1.0, "abcd");
       Rabij.contract(1.0, Xabcd, "abcd", Xabij, "cdij", 1.0, "abij");
       chrono["ccsd - pp-ladder"].stop();
 
@@ -163,11 +166,11 @@ namespace CcsdRef{
       chrono["ccsd - singles"].stop();
 
       // add energy denominator
-      Tai.contract(1.0, Dai, "ai", Rai, "ai", 0.0, "ai");
       Tabij.contract(1.0, Dabij, "abij", Rabij, "abij", 0.0, "abij");
+      Tai.contract(1.0, Dai, "ai", Rai, "ai", 0.0, "ai");
       // As long as we dont want to use a fancy mixer we can write like that
-      Xabij.contract(1.0, Tai, "ai", Tai, "bj", 0.0, "abij");
-      Xabij.sum(1.0, Tabij, "abij", 1.0, "abij");
+      Xabij.sum(1.0, Tabij, "abij", 0.0, "abij");
+      Xabij.contract(1.0, Tai, "ai", Tai, "bj", 1.0, "abij");
       Scf::evalEnergy(Xabij, *in.Vhhpp);
     }
 

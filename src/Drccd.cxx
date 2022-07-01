@@ -25,6 +25,7 @@ namespace Drccd{
     tensor<Complex> Calid(4, {p,h,h,p}, nzc4, cc4x::dw, "Calid");
     tensor<Complex> Xijab(4, {h,h,p,p}, nzc4, cc4x::dw, "Xijab");
 
+    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Kabij");
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
 
     Tabij.contract(1.0, Dabij, "abij", *in.Vpphh, "abij", 0.0, "abij");
@@ -32,9 +33,11 @@ namespace Drccd{
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
     for (size_t i(0); i < cc4x::iterations; i++){
-      Rabij.sum(1.0, *in.Vpphh, "abij", 0.0, "abij");
-      Rabij.contract(2.0, *in.Vphhp, "akic", Tabij, "cbkj", 1.0, "abij");
-      Rabij.contract(2.0, *in.Vphhp, "bkjc", Tabij, "acik", 1.0, "abij");
+      Rabij.contract(2.0, *in.Vphhp, "akic", Tabij, "cbkj", 0.0, "abij",true);
+//      Rabij.contract(2.0, *in.Vphhp, "bkjc", Tabij, "acik", 1.0, "abij",true);
+      Kabij.sum(1.0, Rabij, "baji", 0.0, "abij",true);
+      Rabij.sum(1.0, Kabij, "abij", 1.0, "abij",true);
+      Rabij.sum(1.0, *in.Vpphh, "abij", 1.0, "abij");
       if (!linearized) {
         Xijab.sum(2.0, *in.Vhhpp, "ijab", 0.0, "ijab");
         Calid.contract(2.0, Xijab, "klcd", Tabij, "acik", 0.0, "alid");

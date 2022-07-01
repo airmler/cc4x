@@ -24,7 +24,7 @@
           nonZeroCondition.push_back(r);
         }
       }
-
+      ~tensor() { delete machine_tensor; };
       void
       contract(F          alpha,
                tensor     &A,

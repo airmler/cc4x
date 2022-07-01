@@ -26,6 +26,7 @@
         }
       }
 
+      ~tensor(){ delete machine_tensor; }
       void
       contract(F          alpha,
                tensor     &A,
@@ -34,7 +35,7 @@
                char const *idx_B,
                F          beta,
                char const *idx_C,
-               bool       verbose) {
+               bool       verbose = false) {
 
         machine_tensor->contract(alpha,
                                  *A.machine_tensor,

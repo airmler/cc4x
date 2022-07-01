@@ -15,7 +15,7 @@ CXXFLAGS += -DCTFBS_BACKEND
 
 
 CXXFLAGS += -I${CTF_PATH}/include
-CXXFLAGS += -I.
+CXXFLAGS += -I. -Isrc/
 CXXFLAGS += -I${YAML_PATH}/include
 
 LIBS += -L${CTF_PATH}/lib -lctf

@@ -134,7 +134,7 @@ void
 write(int64_t         npair,
            int64_t const * global_idx,
            F const       * data);
-````
+```
 
 Object reads ```npair``` elements from the adress ```data```. The data is written according to the provided index map ```global_idx```. The global index ```g=i+j*m+k*m*N+l*m*n*p``` is associated with the tensor element (i,j,k,l) with tensor edge lenghts {m,n,p,q}.
 

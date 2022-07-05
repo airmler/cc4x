@@ -1,0 +1,97 @@
+Invalid MIT-MAGIC-COOKIE-1 key
+                __ __      
+     __________/ // / _____
+    / ___/ ___/ // /_/ ___/
+   / /__/ /__/__  __(__  ) 
+   \___/\___/  /_/ /____/  
+  Coupled Cluster for Solids
+
+version: heads/develop-0-g0056198f-dirty, date: Thu May 19 22:36:50 2022 +0200
+build date: May 25 2022 14:44:18
+compiler: g++ (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0
+mpi: mpirun (Open MPI) 4.0.3
+total processes: 1
+calculation started on: Tue Jul  5 16:40:22 2022
+
+DRY RUN ONLY - nothing will be calculated
+Dry run finished. Estimates provided for 1 ranks.
+Memory estimate (per Rank/Total): 0.00361288 / 0.00361288 GB
+Operations estimate (per Rank/Total): 8.11071 / 8.11071 GFLOPS
+Time estimate with assumed performance of 10 GFLOPS/core/s: 0.811071 s (0.000225298 h)
+--
+step: 1, Read
+Unpacking block-sparse tensor
+Reading from text file EigenEnergies.elements
+realtime 0.002028986 s
+--
+step: 2, Read
+Unpacking block-sparse tensor
+Reading from binary file CoulombVertex.elements
+realtime 0.017416962 s
+--
+step: 3, DefineHolesAndParticles
+number of holes     No: 8
+number of particles Nv: 8
+number of states    Np: 16
+realtime 0.000053548 s
+--
+step: 4, SliceOperator
+Slicing CoulombVertex.elements into holes and particles.
+realtime 0.046708233 s
+--
+step: 5, VertexCoulombIntegrals
+Using complex Coulomb integrals
+number of field variables NF: 118
+realtime 0.004807560 s
+--
+step: 6, CoupledCluster
+Using method Ccsd. integralsSliceSize: 100
+Using mixer LinearMixer. ratio: 1
+Maximum number of iterations: 50
+Unless reaching energy convergence dE: 1e-08
+and amplitudes convergence dR: 1e-08
+Iter         Energy         dE           dR         time   GF/s/core
+   1  -2.14135294e+00  -2.1414e+00   1.7766e-01      0.0    1.0
+   2  -2.66423952e+00  -5.2289e-01   6.0832e-02      0.1    1.8
+   3  -2.85698939e+00  -1.9275e-01   2.9621e-02      0.0    3.4
+   4  -2.94022380e+00  -8.3234e-02   1.5901e-02      0.0    3.4
+   5  -2.98017666e+00  -3.9953e-02   8.9839e-03      0.0    3.4
+   6  -3.00054860e+00  -2.0372e-02   5.2426e-03      0.0    3.4
+   7  -3.01139925e+00  -1.0851e-02   3.1303e-03      0.0    3.4
+   8  -3.01736306e+00  -5.9638e-03   1.9029e-03      0.0    3.4
+   9  -3.02072147e+00  -3.3584e-03   1.1746e-03      0.0    3.4
+  10  -3.02264928e+00  -1.9278e-03   7.3508e-04      0.0    3.4
+  11  -3.02377337e+00  -1.1241e-03   4.6598e-04      0.0    3.4
+  12  -3.02443751e+00  -6.6414e-04   2.9896e-04      0.0    3.4
+  13  -3.02483439e+00  -3.9688e-04   1.9395e-04      0.0    3.4
+  14  -3.02507398e+00  -2.3959e-04   1.2711e-04      0.0    3.4
+  15  -3.02521994e+00  -1.4596e-04   8.4064e-05      0.0    3.4
+  16  -3.02530962e+00  -8.9683e-05   5.6038e-05      0.0    3.4
+  17  -3.02536517e+00  -5.5543e-05   3.7610e-05      0.0    3.4
+  18  -3.02539983e+00  -3.4659e-05   2.5387e-05      0.0    3.4
+  19  -3.02542161e+00  -2.1784e-05   1.7217e-05      0.0    3.4
+  20  -3.02543540e+00  -1.3786e-05   1.1722e-05      0.0    3.4
+  21  -3.02544418e+00  -8.7821e-06   8.0061e-06      0.0    3.3
+  22  -3.02544981e+00  -5.6301e-06   5.4819e-06      0.0    3.4
+  23  -3.02545344e+00  -3.6313e-06   3.7610e-06      0.0    3.4
+  24  -3.02545580e+00  -2.3556e-06   2.5845e-06      0.0    3.4
+  25  -3.02545733e+00  -1.5365e-06   1.7783e-06      0.0    3.4
+  26  -3.02545834e+00  -1.0074e-06   1.2248e-06      0.0    3.4
+  27  -3.02545900e+00  -6.6366e-07   8.4425e-07      0.0    3.4
+  28  -3.02545944e+00  -4.3921e-07   5.8230e-07      0.0    3.4
+  29  -3.02545973e+00  -2.9189e-07   4.0182e-07      0.0    3.4
+  30  -3.02545993e+00  -1.9474e-07   2.7738e-07      0.0    3.4
+  31  -3.02546006e+00  -1.3039e-07   1.9154e-07      0.0    3.4
+  32  -3.02546015e+00  -8.7591e-08   1.3230e-07      0.0    3.4
+  33  -3.02546021e+00  -5.9016e-08   9.1395e-08      0.0    3.4
+  34  -3.02546025e+00  -3.9871e-08   6.3147e-08      0.0    3.4
+  35  -3.02546027e+00  -2.7003e-08   4.3635e-08      0.0    3.4
+  36  -3.02546029e+00  -1.8329e-08   3.0155e-08      0.0    3.4
+  37  -3.02546030e+00  -1.2466e-08   2.0841e-08      0.0    3.4
+  38  -3.02546031e+00  -8.4932e-09   1.4404e-08      0.0    3.4
+  39  -3.02546032e+00  -5.7961e-09   9.9562e-09      0.0    3.4
+
+Ccsd correlation energy:          -3.0254603173
+2nd-order correlation energy:     -2.1413529426
+realtime 1.927470772 s
+--

@@ -1,0 +1,30 @@
+version: 100
+type: Tensor
+scalarType: Complex64
+dimensions:
+- length:    118
+  type: AuxiliaryField
+- length:     16
+  type: State
+- length:     16
+  type: State
+elements:
+  type: IeeeBinaryFile
+unit: 0.1917011272153577       # = sqrt(Eh/eV)
+metaData:
+  halfGrid: 0
+  kMesh: [ 1, 1, 1]
+nonZeroCondition:
+  all:
+  - name: CrystalMomentumConservation
+    properties:
+    - property: CrystalMomentum
+      dimension: 0
+    - property: CrystalMomentum
+      dimension: 1
+    - property: CrystalMomentum
+      dimension: 2
+    nonZeros:
+    - -      0
+      -      0
+      -      0

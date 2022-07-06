@@ -9,8 +9,8 @@ OBJ_PATH          = $(BUILD_PATH)/obj
 BIN_PATH          = $(BUILD_PATH)/bin
 BIN_PROGRAMS      = $(BIN_PATH)/${EXE}
 
-SRC := $(shell find . -name '*.cxx')
-OBJ_FILES = $(patsubst %.cxx,$(OBJ_PATH)/%.o,$(SRC))
+SRC := $(wildcard $(SRC_PATH)/*.cxx)
+OBJ_FILES = $(patsubst $(SRC_PATH)/%.cxx,$(OBJ_PATH)/%.o,$(SRC))
 
 clean:
 	rm -rf $(BUILD_PATH)
@@ -18,7 +18,7 @@ clean:
 EXE := cc4x
 install: $(BIN_PROGRAMS)
 
-$(OBJ_PATH)/%.o: %.cxx
+$(OBJ_PATH)/%.o: $(SRC_PATH)/%.cxx
 	mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 

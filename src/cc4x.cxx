@@ -26,6 +26,7 @@ bool cc4x::ref;
 int cc4x::No;
 int cc4x::Nv;
 int cc4x::Nx;
+int cc4x::NF;
 int cc4x::iterations;
 CTF::World * cc4x::dw = NULL;
 kMesh * cc4x::kmesh = NULL;
@@ -33,7 +34,7 @@ kMesh * cc4x::kmesh = NULL;
 void printSystem(){
   if (cc4x::complexT) { LOG() << "Working with complex Integrals\n"; }
   else { LOG() << "Working with real Integrals\n"; }
-  LOG() << "No: " << cc4x::No << " , Nv: " << cc4x::Nv << "\n";
+  LOG() << "No: " << cc4x::No << " , Nv: " << cc4x::Nv << " , NF: " << cc4x::NF <<"\n";
   LOG() << "kMesh: " << cc4x::kmesh->mesh[0] << " " << cc4x::kmesh->mesh[1] << " " << cc4x::kmesh->mesh[2] << "\n";
 }
 
@@ -49,6 +50,8 @@ int main(int argc, char **argv){
                 , "Number of occupied orbitals")->default_val(0);
   app.add_option("-v, --virtuals"
                 , cc4x::Nv, "Number of virtual  orbitals")->default_val(0);
+  app.add_option("-g, --auxiliaryGrid"
+		, cc4x::NF, "Number of auxiliary filed variables")->default_val(-1);
   app.add_option("-r, --wignerSeitz"
                 , rs, "Wigner-Seitz radius")->default_val(rs);
   app.add_flag("-d, --drccd", cc4x::drccd
@@ -69,7 +72,11 @@ int main(int argc, char **argv){
     return retval;
   }
   if (cc4x::drccd) cc4x::ccsd = false;
+
   cc4x::dw = new CTF::World();
+#ifdef CONTRACTION_COLLECTOR
+  CTF::Contraction_collector cc;
+#endif
 
   tensor<Complex> *eps = NULL_TENSOR;
   tensor<Complex> *coulombVertex = NULL_TENSOR;
@@ -119,7 +126,7 @@ int main(int argc, char **argv){
       if (cc4x::No == 0 || cc4x::Nv == 0) {
         THROW("Setting rs > 0 requires specification of No && Nv");
       }
-      Ueg::input in({cc4x::No, cc4x::Nv, rs});
+      Ueg::input in({cc4x::No, cc4x::Nv, cc4x::NF, rs});
       Ueg::output out({&coulombVertex, &eps});
       Ueg::run(in, out);
     }
@@ -170,6 +177,11 @@ int main(int argc, char **argv){
     LOG() << "WHAT THE FUCK" << std::endl;
   }
 
+#ifdef CONTRACTION_COLLECTOR
+  if (!cc4x::dw->rank) cc.analyze(1);
+#endif
+
+  delete cc4x::dw;
   MPI_Finalize();
   return 0;
 }

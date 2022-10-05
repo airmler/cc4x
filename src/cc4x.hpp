@@ -14,6 +14,7 @@ class cc4x {
    static int No;
    static int Nv;
    static int Nx;
+   static int NF;
    static int iterations;
    static CTF::World *dw;
    static kMesh *kmesh;

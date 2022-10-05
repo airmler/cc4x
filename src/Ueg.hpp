@@ -9,7 +9,7 @@ using darr  = array<double,4>;
 
 namespace Ueg {
   struct input {
-    int64_t No, Nv;
+    int64_t No, Nv, NF;
     double rs;
   };
   struct output {

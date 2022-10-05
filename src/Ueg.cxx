@@ -38,7 +38,8 @@ namespace Ueg{
 
   void run(input const& in, output& out){
     auto No(in.No), Nv(in.Nv), Np(No+Nv);
-    auto rs(in.rs);
+    auto rs(in.rs); auto NF(in.NF);
+
     cc4x::No = No;
     cc4x::Nv = Nv;
     cc4x::complexT = true;
@@ -57,17 +58,17 @@ namespace Ueg{
     if (sL(iGrid[Np]) == sL(iGrid[Np-1]))
       LOG() << "WARNING: virtual orbitals form not a closed shell\n";
     iGrid.resize(Np);
- 
+
     // define volume, lattice Constant, and reciprocal lattice constant
     double v(rs*rs*rs/3.0*4.0*M_PI*No*2);
     double a(pow(v,1./3.));
     double b(2.0*M_PI/a);
-  
+
     std::vector<darr> dGrid;
     // here we can introduce a possible shift of the mesh
     for (auto i: iGrid)
       dGrid.push_back( { b*i[0], b*i[1], b*i[2], 0.0} );
-  
+
     // now we can write the hartree fock energy in the 4th entry
     for (auto &d: dGrid){
       d[3] = 0.5*sL(d); // add the kinetic energy
@@ -81,10 +82,10 @@ namespace Ueg{
       refE += dGrid[o][3];
       refE += 0.5*sL(dGrid[o]);
     }
-  
+
     LOG() << "Hartree Fock energy: " << refE/No/2 << " Ha per electron\n";
     LOG() << "HOMO: " << dGrid[No-1][3] << " , LUMO: " << dGrid[No][3] << '\n';
-    // work on the eigen energies  
+    // work on the eigen energies
     std::vector<Complex> energies(Np);
     auto eps = new tensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::dw, "eps");
 
@@ -122,61 +123,64 @@ namespace Ueg{
       if ( sL(t) > maxR ) continue;
       momMap[t] = index++;
     }
-    int64_t NF = momMap.size();
-  
+    if (NF < 0) {
+      NF = momMap.size();
+      cc4x::NF = NF;
+    }
+
     auto cV = new tensor<Complex>(3, {NF,Np,Np}, cc4x::kmesh->getNZC(3), cc4x::dw, "cVertex");
 
 
-    // Writing CoulombVertex to buffer 
-    // We have to do it mpi-able...otherwise we will 
-    // not be able to write it to a ctf tensor 
+    // Writing CoulombVertex to buffer
+    // We have to do it mpi-able...otherwise we will
+    // not be able to write it to a ctf tensor
     double fac(4.0*M_PI/v);
 
-    int64_t np = cc4x::dw->np; 
-    int64_t rank = cc4x::dw->rank; 
-    // We slice the number of states for all the mpi processes 
-    int64_t slices(Np/np); 
-    std::vector<size_t> slicePerRank(np); 
-    for (size_t r(0); r < np; r++){ 
-      size_t lslice(slices); 
-      for (size_t i(0); i < Np - slices*np; i++) if (r == i){ 
-        lslice++; 
-      } 
-      slicePerRank[r] = lslice; 
-    } 
-    slices = slicePerRank[rank]; 
-    //allocate only a buffer of needed size 
-    std::vector<Complex> vData(NF*Np*slices,{0,0}); 
-    // determine begin and end of the rank's slices 
-    auto sbegin( std::accumulate( slicePerRank.begin() 
-                                , slicePerRank.begin() + rank 
-                                , 0UL 
-                                , std::plus<int64_t>() 
+    int64_t np = cc4x::dw->np;
+    int64_t rank = cc4x::dw->rank;
+    // We slice the number of states for all the mpi processes
+    int64_t slices(Np/np);
+    std::vector<size_t> slicePerRank(np);
+    for (size_t r(0); r < np; r++){
+      size_t lslice(slices);
+      for (size_t i(0); i < Np - slices*np; i++) if (r == i){
+        lslice++;
+      }
+      slicePerRank[r] = lslice;
+    }
+    slices = slicePerRank[rank];
+    //allocate only a buffer of needed size
+    std::vector<Complex> vData(NF*Np*slices,{0,0});
+    // determine begin and end of the rank's slices
+    auto sbegin( std::accumulate( slicePerRank.begin()
+                                , slicePerRank.begin() + rank
+                                , 0UL
+                                , std::plus<int64_t>()
                                 )
                );
 
-    for (int64_t s(0); s < slices; s++) 
-    for (int64_t q(0); q < Np; q++){ 
-      auto p(s+sbegin); 
-      iarr d = { iGrid[q][0] - iGrid[p][0] 
-               , iGrid[q][1] - iGrid[p][1] 
-               , iGrid[q][2] - iGrid[p][2] 
-               }; 
-      // This is a hack! 
-      // If NF is chosen by the user we will not have an overflow 
-      int64_t ii = momMap[d] % NF; 
-      double res; 
-      (sL(d)) ? res = fac/( b*b*sL(d) ) : res = evalMadelung(v); 
-      vData[ii+q*NF+s*NF*Np] = { sqrt(res), 0.0}; 
-    } 
-   
-    idx.resize(vData.size()); 
-    std::iota(idx.begin(), idx.end(), sbegin*Np*NF); 
-    cV->write(idx.size(), idx.data(), vData.data()); 
+    for (int64_t s(0); s < slices; s++)
+    for (int64_t q(0); q < Np; q++){
+      auto p(s+sbegin);
+      iarr d = { iGrid[q][0] - iGrid[p][0]
+               , iGrid[q][1] - iGrid[p][1]
+               , iGrid[q][2] - iGrid[p][2]
+               };
+      // This is a hack!
+      // If NF is chosen by the user we will not have an overflow
+      int64_t ii = momMap[d] % NF;
+      double res;
+      (sL(d)) ? res = fac/( b*b*sL(d) ) : res = evalMadelung(v);
+      vData[ii+q*NF+s*NF*Np] = { sqrt(res), 0.0};
+    }
+
+    idx.resize(vData.size());
+    std::iota(idx.begin(), idx.end(), sbegin*Np*NF);
+    cV->write(idx.size(), idx.data(), vData.data());
 
 
     *out.coulombVertex = cV;
-    
+
 
     return;
   }

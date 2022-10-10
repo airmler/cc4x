@@ -33,10 +33,10 @@ namespace Drccd{
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
     for (size_t i(0); i < cc4x::iterations; i++){
-      Rabij.contract(2.0, *in.Vphhp, "akic", Tabij, "cbkj", 0.0, "abij",true);
-//      Rabij.contract(2.0, *in.Vphhp, "bkjc", Tabij, "acik", 1.0, "abij",true);
-      Kabij.sum(1.0, Rabij, "baji", 0.0, "abij",true);
-      Rabij.sum(1.0, Kabij, "abij", 1.0, "abij",true);
+      Rabij.contract(2.0, *in.Vphhp, "akic", Tabij, "cbkj", 0.0, "abij");
+//      Rabij.contract(2.0, *in.Vphhp, "bkjc", Tabij, "acik", 1.0, "abij");
+      Kabij.sum(1.0, Rabij, "baji", 0.0, "abij");
+      Rabij.sum(1.0, Kabij, "abij", 1.0, "abij");
       Rabij.sum(1.0, *in.Vpphh, "abij", 1.0, "abij");
       if (!linearized) {
         Xijab.sum(2.0, *in.Vhhpp, "ijab", 0.0, "ijab");

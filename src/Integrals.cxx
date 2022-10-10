@@ -75,6 +75,8 @@ namespace Integrals{
       auto Vhphp = new tensor<Complex>(4, {h,p,h,p}, nzc4, cc4x::dw, "Vhphp");
       auto Vphhh = new tensor<Complex>(4, {p,h,h,h}, nzc4, cc4x::dw, "Vphhh");
       auto Vphph = new tensor<Complex>(4, {p,h,p,h}, nzc4, cc4x::dw, "Vphph");
+      //We have to add this integral here.
+      auto Vphpp = new tensor<Complex>(4, {p,h,p,p}, nzc4, cc4x::dw, "Vphpp");
 
       Vhhhh->contract(1.0, conjGhh, "Gai", *in.hh, "Gbj", 0.0, "abij");
       Vhhhp->contract(1.0, conjGhh, "Gaj", *in.hp, "Gib", 0.0, "aijb");
@@ -82,6 +84,7 @@ namespace Integrals{
       Vhphp->contract(1.0, conjGhh, "Gai", *in.pp, "Gbj", 0.0, "abij");
       Vphhh->contract(1.0, conjGph, "Gaj", *in.hh, "Gib", 0.0, "aijb");
       Vphph->contract(1.0, conjGpp, "Gaj", *in.hh, "Gib", 0.0, "aijb");
+      Vphpp->contract(1.0, conjGpp, "Gac", *in.hp, "Gkd", 0.0, "akcd");
 
       *out.Vhhhh = Vhhhh;
       *out.Vhhhp = Vhhhp;
@@ -89,15 +92,14 @@ namespace Integrals{
       *out.Vhphp = Vhphp;
       *out.Vphhh = Vphhh;
       *out.Vphph = Vphph;
+      *out.Vphpp = Vphpp;
     }
     if (cc4x::ref) { 
       auto Vhppp = new tensor<Complex>(4, {h,p,p,p}, nzc4, cc4x::dw, "Vhppp");
-      auto Vphpp = new tensor<Complex>(4, {p,h,p,p}, nzc4, cc4x::dw, "Vphpp");
       auto Vpphp = new tensor<Complex>(4, {p,p,h,p}, nzc4, cc4x::dw, "Vpphp");
       auto Vppph = new tensor<Complex>(4, {p,p,p,h}, nzc4, cc4x::dw, "Vppph");
       auto Vpppp = new tensor<Complex>(4, {p,p,p,p}, nzc4, cc4x::dw, "Vpppp");
       Vhppp->contract(1.0, conjGhp, "Gai", *in.pp, "Gbj", 0.0, "abij");
-      Vphpp->contract(1.0, conjGpp, "Gia", *in.hp, "Gjb", 0.0, "ijab");
       Vpphp->contract(1.0, conjGph, "Gai", *in.pp, "Gbj", 0.0, "abij");
       Vppph->contract(1.0, conjGpp, "Gai", *in.ph, "Gbj", 0.0, "abij");
       chrono["Integrals - pppp"].start();
@@ -105,7 +107,6 @@ namespace Integrals{
       chrono["Integrals - pppp"].stop();
 
       *out.Vhppp = Vhppp;
-      *out.Vphpp = Vphpp;
       *out.Vpphp = Vpphp;
       *out.Vppph = Vppph;
       *out.Vpppp = Vpppp;

@@ -168,7 +168,7 @@ int main(int argc, char **argv){
     {
       if (cc4x::Nx <= 0) cc4x::Nx = cc4x::No;
       LOG() << "ccsd with slice size " << cc4x::Nx << std::endl;
-      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
+      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, Vphpp, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
       Ccsd::output out({});
       Ccsd::run(in, out);
     }

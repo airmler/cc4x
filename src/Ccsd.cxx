@@ -5,6 +5,20 @@
 
 namespace Ccsd{
   Complex conjo(Complex x){ return std::conj(x); }
+  std::function<int(const ivec &, const ivec &)>
+  compare(const ivec p)
+  {
+    return [p] (const ivec &a, const ivec &b) -> int {
+      size_t n(a.size());
+      ivec c(n), d(n);
+      for (size_t i(0); i < n - 1; i++){
+        c[i] = a[p[i]]; d[i] = b[p[i]];
+      }
+      return c < d;
+    };
+  }
+
+
 
   void run(input const& in, output& out){
     Timings chrono;
@@ -18,6 +32,7 @@ namespace Ccsd{
       || in.Vphhp == NULL    || in.Vphhp == (tensor<Complex>*)0xfafa
       || in.Vphph == NULL    || in.Vphph == (tensor<Complex>*)0xfafa
       || in.Vpphh == NULL    || in.Vpphh == (tensor<Complex>*)0xfafa
+      || in.Vphpp == NULL    || in.Vphpp == (tensor<Complex>*)0xfafa
       || in.epsi ==  NULL    || in.epsi  == (tensor<Complex>*)0xfafa
       || in.epsa ==  NULL    || in.epsa  == (tensor<Complex>*)0xfafa
       || in.hhVertex == NULL || in.hhVertex == (tensor<Complex>*)0xfafa
@@ -70,10 +85,15 @@ namespace Ccsd{
     tensor<Complex> G(1, {g}, nzc1, cc4x::dw, "G");
 
     std::function<Complex(const Complex)> fConj(&conjo);
-    cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", fConj);
-    cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", fConj);
-    cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", fConj);
-    cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", fConj);
+    auto flip(in.hpVertex->nonZeroCondition);
+    // sort in a way that the second column in the fastest, third second fastest
+    // sorting like that introduces a flip from ia->ai of the nonZeroConditions
+    std::sort(flip.begin(), flip.end(), compare({1,2,0}));
+
+    cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", in.hhVertex->nonZeroCondition, flip, fConj);
+    cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", in.hpVertex->nonZeroCondition, flip, fConj);
+    cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", in.phVertex->nonZeroCondition, flip, fConj);
+    cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", in.ppVertex->nonZeroCondition, flip, fConj);
 
     Scf::getDai(Dai, *in.epsi, *in.epsa);
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
@@ -95,10 +115,15 @@ namespace Ccsd{
       Lac.sum(1.0, Kac, "ac", 0.0, "ac");
 
 
-      G.contract(1.0,   *in.hpVertex, "Gkd", Tai, "dk", 0.0, "G");
-      Lac.contract(2.0, cTppVertex, "Gac", G, "G", 1.0, "ac");
-      Gpp.contract(1.0, *in.hpVertex, "Gkc", Tai, "dk", 0.0, "Gcd");
-      Lac.contract(-1., cTppVertex, "Gad", Gpp, "Gcd", 1.0, "ac");
+//TODO: The following five lines have to be replaced by the CCSDREF implementation
+//    (because of the flawed logic in ctf-bs)
+//      G.contract(1.0,   *in.hpVertex, "Gkd", Tai, "dk", 0.0, "G");
+//      Lac.contract(2.0, cTppVertex, "Gac", G, "G", 1.0, "ac");
+//      Gpp.contract(1.0, *in.hpVertex, "Gkc", Tai, "dk", 0.0, "Gcd");
+//      Lac.contract(-1., cTppVertex, "Gad", Gpp, "Gcd", 1.0, "ac");
+      Lac.contract( 2.0, *in.Vphpp, "akcd", Tai, "dk", 1.0, "ac");
+      Lac.contract(-1.0, *in.Vphpp, "akdc", Tai, "dk", 1.0, "ac");
+
 
       Kki.contract( 2.0, *in.Vhhpp, "klcd", Xabij, "cdil", 0.0, "ki");
       Kki.contract(-1.0, *in.Vhhpp, "kldc", Xabij, "cdil", 1.0, "ki");
@@ -116,18 +141,38 @@ namespace Ccsd{
       Xakij.sum(1.0, *in.Vphhh, "akij", 0.0, "akij");
       Xakij.contract(1.0, *in.Vphhp, "akic", Tai, "cj", 1.0, "akij");
       Rabij.contract(-1.0, Xakij, "akij", Tai, "bk", 1.0, "abij");
-      Gph.sum(1.0, cTphVertex, "Gai", 0.0, "Gai");
-      Gph.contract(-1.0, cThhVertex, "Gki", Tai, "ak", 1.0, "Gai");
-      Ghp.contract(1.0, *in.ppVertex, "Gbc", Tai, "cj", 0.0, "Gjb");
-      Rabij.contract(1.0, Gph, "Gai", Ghp, "Gjb", 1.0, "abij");
+
+//TODO:The following five lines have to be replaced by the CCSDREF implementation
+//    (because of the flawed logic in ctf-bs)
+      //Gph.sum(1.0, cTphVertex, "Gai", 0.0, "Gai");
+      //Gph.contract(-1.0, cThhVertex, "Gki", Tai, "ak", 1.0, "Gai");
+      //Ghp.contract(1.0, *in.ppVertex, "Gbc", Tai, "cj", 0.0, "Gjb");
+      //Rabij.contract(0.0, Gph, "Gai", Ghp, "Gjb", 1.0, "abij");
+
+// Note: We use the coulomb integral available and conjugate it
+      Xabic.sum(1.0, *in.Vphpp, "ciba", 0.0, "abic");
+      Xabic.sum(1.0, Xabic, "abic", 0.0, "abic", fConj);
+      Xabic.contract(-1.0, *in.Vphph, "bkci", Tai, "ak", 1.0, "abic");
+      Rabij.contract(1.0, Xabic, "abic", Tai, "cj", 1.0, "abij");
+
       chrono["ccsd - t1r2"].stop();
       // Xakic
       chrono["ccsd - akic"].start();
-      Gph.contract( 1.0, cTppVertex, "Gad", Tai, "di", 1.0, "Gai");
-      Gph.contract(-0.5, cThpVertex, "Gld", Yabij, "dail", 1.0, "Gai");
-      Xakic.contract(1.0, Gph, "Gai", *in.hpVertex, "Gkc", 0.0, "akic");
-      Xakic.contract(1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
-      Xakic.contract(-0.5,*in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
+
+//TODO:The following five lines have to be replaced by the CCSDREF implementation
+//    (because of the flawed logic in ctf-bs)
+//      Gph.contract( 1.0, cTppVertex, "Gad", Tai, "di", 1.0, "Gai");
+//      Gph.contract(-0.5, cThpVertex, "Gld", Yabij, "dail", 1.0, "Gai");
+//      Xakic.contract(1.0, Gph, "Gai", *in.hpVertex, "Gkc", 0.0, "akic");
+//      Xakic.contract(1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
+//      Xakic.contract(-0.5,*in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
+      Xakic.sum(1.0, *in.Vphhp, "akic", 0.0, "akic");
+      Xakic.contract(-1.0, *in.Vhhhp, "lkic", Tai, "al", 1.0, "akic");
+      Xakic.contract( 1.0, *in.Vphpp, "akdc", Tai, "di", 1.0, "akic");
+      Xakic.contract(-0.5, *in.Vhhpp, "lkdc", Yabij, "dail", 1.0, "akic");
+      Xakic.contract( 1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
+      Xakic.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
+
       Rabij.contract(2.0, Xakic, "akic", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakic, "akic", Tabij, "bckj", 1.0, "abij");
       chrono["ccsd - akic"].stop();
@@ -208,6 +253,7 @@ namespace Ccsd{
       Rabij.contract(1.0, Xklij, "klij", Xabij, "abkl", 1.0, "abij");
       Xklij.contract(1.0, *in.Vhhpp, "klcd", Xabij, "cdij", 0.0, "klij");
       Rabij.contract(1.0, Xklij, "klij", Tabij, "abkl", 1.0, "abij");
+
       chrono["ccsd - hh-ladder"].stop();
 
       // Singles contribution
@@ -226,10 +272,14 @@ namespace Ccsd{
       Rai.contract( 2.0, *in.Vphhp, "akic", Tai, "ck", 1.0, "ai");
       Rai.contract(-1.0, *in.Vphph, "akci", Tai, "ck", 1.0, "ai");
 
-      Gph.contract( 1.0, *in.hpVertex, "Gkd", Xabij, "cdik", 0.0, "Gci");
-      Rai.contract( 2.0, cTppVertex, "Gac", Gph, "Gci", 1.0, "ai");
-      Gph.contract( 1.0, *in.hpVertex, "Gkc", Xabij, "cdik", 0.0, "Gdi");
-      Rai.contract(-1.0, cTppVertex, "Gad", Gph, "Gdi", 1.0, "ai");
+//TODO:The following four lines have to be replaced by the CCSDREF implementation
+//    (because of the flawed logic in ctf-bs)
+//      Gph.contract( 1.0, *in.hpVertex, "Gkd", Xabij, "cdik", 0.0, "Gci",true);
+//      Rai.contract( 2.0, cTppVertex, "Gca", Gph, "Gci", 1.0, "ai",true);
+//      Gph.contract( 1.0, *in.hpVertex, "Gkc", Xabij, "cdik", 0.0, "Gdi");
+//      Rai.contract(-1.0, cTppVertex, "Gad", Gph, "Gdi", 1.0, "ai");
+      Rai.contract( 2.0, *in.Vphpp, "akcd", Xabij, "cdik", 1.0, "ai");
+      Rai.contract(-1.0, *in.Vphpp, "akdc", Xabij, "cdik", 1.0, "ai");
 
       Rai.contract(-2.0, *in.Vhhhp, "klic", Xabij, "ackl", 1.0, "ai");
       Rai.contract( 1.0, *in.Vhhhp, "lkic", Xabij, "ackl", 1.0, "ai");

@@ -20,6 +20,7 @@ class kMesh {
    ivec idxToK(const int i);
    int idxMinusIdx(const int i, const int j);
    int getForthIdx(const int k, const int i, const int j);
+   int getMinusIdx(const int i);
    std::vector<ivec> getNZC(const int d);
    void print();
 };

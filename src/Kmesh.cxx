@@ -45,8 +45,13 @@
     ivec kk(idxToK(k));
     ivec d( { ki[0] + kj[0] - kk[0]
             , ki[1] + kj[1] - kk[1]
-            , ki[2] + kj[2] - kk[1]
+            , ki[2] + kj[2] - kk[2]
             } );
+    return kToIdx(backfold(d));
+  }
+  int kMesh::getMinusIdx(const int i){
+    ivec k(idxToK(i));
+    ivec d({-k[0], -k[1], -k[2]});
     return kToIdx(backfold(d));
   }
   std::vector<ivec> kMesh::getNZC(const int dim){
@@ -66,6 +71,7 @@
       for (int m(0); m < Nk; m++)
       for (int n(0); n < Nk; n++)
         out[n + m * Nk] = {idxMinusIdx(n,m), n, m};
+        //out[n + m * Nk] = {-1, n, m};
       return out;
     }
     if ( dim == 4) {

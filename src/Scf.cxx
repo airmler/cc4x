@@ -23,10 +23,10 @@ namespace Scf{
     LOG() << " ( " << real(direct)/Nk;
     LOG() << " / " << real(exchange)/Nk;
     LOG() <<  " )" << std::endl;
-    if (std::abs(imag(direct)) > 1e-5){
+    if ( std::abs(imag(direct)) / std::abs(real(direct)) > 1e-7){
       LOG() << "\nWarning. direct part is imaginary " << imag(direct)/Nk << '\n';
     }
-    if (std::abs(imag(exchange)) > 1e-5){
+    if ( std::abs(imag(exchange)) / std::abs(real(exchange)) > 1e-7){
       LOG() << "\nWarning. exchange part is imaginary " << imag(exchange)/Nk << '\n';
     }
   }

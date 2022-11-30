@@ -135,6 +135,13 @@
         machine_tensor->slice(offsets.data(), ends.data(), beta, *A.machine_tensor, offsets_A.data(), ends_A.data(), alpha);
       }
 
+      void relabelBlocks( std::vector< std::vector<int> > nonZeroOut
+                        , std::vector< std::vector<int> > nonZeroIn
+                        ){
+        /* .... */
+      }
+
+
     std::vector<int64_t> lens;
     std::vector< std::vector<int> > nonZeroCondition;
 

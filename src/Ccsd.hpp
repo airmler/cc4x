@@ -14,7 +14,6 @@ namespace Ccsd {
     tensor<Complex> *Vphhp;
     tensor<Complex> *Vphph;
     tensor<Complex> *Vpphh;
-    tensor<Complex> *Vphpp;
     tensor<Complex> *epsi;
     tensor<Complex> *epsa;
     tensor<Complex> *hhVertex;

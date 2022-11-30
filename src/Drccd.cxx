@@ -6,6 +6,9 @@
 namespace Drccd{
 
   void run(input const& in, output& out){
+    Timings chrono;
+    chrono["drccd"].start();
+
     bool linearized(false);
     // sanity checks
     if ( in.Vpphh == NULL || in.Vpphh == (tensor<Complex>*)0xfafa
@@ -49,6 +52,10 @@ namespace Drccd{
     }
 
     Scf::evalEnergy(Tabij, *in.Vhhpp, "Drccd");
+
+    chrono["drccd"].stop();
+    for (auto t: chrono)
+      LOG() << t.first << " " << t.second.count() << "\n";
 
     return;
   }

@@ -32,7 +32,6 @@ namespace Ccsd{
       || in.Vphhp == NULL    || in.Vphhp == (tensor<Complex>*)0xfafa
       || in.Vphph == NULL    || in.Vphph == (tensor<Complex>*)0xfafa
       || in.Vpphh == NULL    || in.Vpphh == (tensor<Complex>*)0xfafa
-      || in.Vphpp == NULL    || in.Vphpp == (tensor<Complex>*)0xfafa
       || in.epsi ==  NULL    || in.epsi  == (tensor<Complex>*)0xfafa
       || in.epsa ==  NULL    || in.epsa  == (tensor<Complex>*)0xfafa
       || in.hhVertex == NULL || in.hhVertex == (tensor<Complex>*)0xfafa
@@ -82,6 +81,15 @@ namespace Ccsd{
     tensor<Complex> Gph(3, {g,p,h}, nzc3, cc4x::dw, "Gph");
     tensor<Complex> Ghp(3, {g,h,p}, nzc3, cc4x::dw, "Ghp");
     tensor<Complex> Gpp(3, {g,p,p}, nzc3, cc4x::dw, "Gpp");
+    tensor<Complex> cTGpp(3, {g,p,p}, nzc3, cc4x::dw, "ctGpp");
+    tensor<Complex> cTGph(3, {g,p,h}, nzc3, cc4x::dw, "ctGph");
+
+    auto minusq(cThhVertex.nonZeroCondition);
+    for (auto &e: minusq) e[0] = cc4x::kmesh->getMinusIdx(e[0]);
+
+    cTGpp.relabelBlocks(minusq, cTGpp.nonZeroCondition);
+    cTGph.relabelBlocks(minusq, cTGph.nonZeroCondition);
+
     tensor<Complex> G(1, {g}, nzc1, cc4x::dw, "G");
 
     std::function<Complex(const Complex)> fConj(&conjo);
@@ -94,6 +102,13 @@ namespace Ccsd{
     cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", in.hpVertex->nonZeroCondition, flip, fConj);
     cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", in.phVertex->nonZeroCondition, flip, fConj);
     cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", in.ppVertex->nonZeroCondition, flip, fConj);
+
+    cThhVertex.relabelBlocks(minusq, cThhVertex.nonZeroCondition);
+    cTphVertex.relabelBlocks(minusq, cTphVertex.nonZeroCondition);
+    cThpVertex.relabelBlocks(minusq, cThpVertex.nonZeroCondition);
+    cTppVertex.relabelBlocks(minusq, cTppVertex.nonZeroCondition);
+
+
 
     Scf::getDai(Dai, *in.epsi, *in.epsa);
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
@@ -114,15 +129,10 @@ namespace Ccsd{
       Kac.contract( 1.0, *in.Vhhpp, "kldc", Xabij, "adkl", 1.0, "ac");
       Lac.sum(1.0, Kac, "ac", 0.0, "ac");
 
-
-//TODO: The following five lines have to be replaced by the CCSDREF implementation
-//    (because of the flawed logic in ctf-bs)
-//      G.contract(1.0,   *in.hpVertex, "Gkd", Tai, "dk", 0.0, "G");
-//      Lac.contract(2.0, cTppVertex, "Gac", G, "G", 1.0, "ac");
-//      Gpp.contract(1.0, *in.hpVertex, "Gkc", Tai, "dk", 0.0, "Gcd");
-//      Lac.contract(-1., cTppVertex, "Gad", Gpp, "Gcd", 1.0, "ac");
-      Lac.contract( 2.0, *in.Vphpp, "akcd", Tai, "dk", 1.0, "ac");
-      Lac.contract(-1.0, *in.Vphpp, "akdc", Tai, "dk", 1.0, "ac");
+      G.contract(1.0,   *in.hpVertex, "Gkd", Tai, "dk", 0.0, "G");
+      Lac.contract(2.0, cTppVertex, "Gac", G, "G", 1.0, "ac");
+      Gpp.contract( 1.0, *in.hpVertex, "Gkc", Tai, "dk", 0.0, "Gdc");
+      Lac.contract(-1.0, cTppVertex, "Gad", Gpp, "Gdc", 1.0, "ac");
 
 
       Kki.contract( 2.0, *in.Vhhpp, "klcd", Xabij, "cdil", 0.0, "ki");
@@ -142,36 +152,21 @@ namespace Ccsd{
       Xakij.contract(1.0, *in.Vphhp, "akic", Tai, "cj", 1.0, "akij");
       Rabij.contract(-1.0, Xakij, "akij", Tai, "bk", 1.0, "abij");
 
-//TODO:The following five lines have to be replaced by the CCSDREF implementation
-//    (because of the flawed logic in ctf-bs)
-      //Gph.sum(1.0, cTphVertex, "Gai", 0.0, "Gai");
-      //Gph.contract(-1.0, cThhVertex, "Gki", Tai, "ak", 1.0, "Gai");
-      //Ghp.contract(1.0, *in.ppVertex, "Gbc", Tai, "cj", 0.0, "Gjb");
-      //Rabij.contract(0.0, Gph, "Gai", Ghp, "Gjb", 1.0, "abij");
+      cTGph.sum(1.0, cTphVertex, "Gai", 0.0, "Gai");
+      cTGph.contract(-1.0, cThhVertex, "Gki", Tai, "ak", 1.0, "Gai");
 
-// Note: We use the coulomb integral available and conjugate it
-      Xabic.sum(1.0, *in.Vphpp, "ciba", 0.0, "abic");
-      Xabic.sum(1.0, Xabic, "abic", 0.0, "abic", fConj);
-      Xabic.contract(-1.0, *in.Vphph, "bkci", Tai, "ak", 1.0, "abic");
-      Rabij.contract(1.0, Xabic, "abic", Tai, "cj", 1.0, "abij");
+      Gph.contract(1.0, *in.ppVertex, "Gbc", Tai, "cj", 0.0, "Gbj");
+      Rabij.contract(1.0, cTGph, "Gai", Gph, "Gbj", 1.0, "abij");
 
       chrono["ccsd - t1r2"].stop();
       // Xakic
       chrono["ccsd - akic"].start();
 
-//TODO:The following five lines have to be replaced by the CCSDREF implementation
-//    (because of the flawed logic in ctf-bs)
-//      Gph.contract( 1.0, cTppVertex, "Gad", Tai, "di", 1.0, "Gai");
-//      Gph.contract(-0.5, cThpVertex, "Gld", Yabij, "dail", 1.0, "Gai");
-//      Xakic.contract(1.0, Gph, "Gai", *in.hpVertex, "Gkc", 0.0, "akic");
-//      Xakic.contract(1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
-//      Xakic.contract(-0.5,*in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
-      Xakic.sum(1.0, *in.Vphhp, "akic", 0.0, "akic");
-      Xakic.contract(-1.0, *in.Vhhhp, "lkic", Tai, "al", 1.0, "akic");
-      Xakic.contract( 1.0, *in.Vphpp, "akdc", Tai, "di", 1.0, "akic");
-      Xakic.contract(-0.5, *in.Vhhpp, "lkdc", Yabij, "dail", 1.0, "akic");
-      Xakic.contract( 1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
-      Xakic.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
+      cTGph.contract( 1.0, cTppVertex, "Gad", Tai, "di", 1.0, "Gai");
+      cTGph.contract(-0.5, cThpVertex, "Gld", Yabij, "dail", 1.0, "Gai");
+      Xakic.contract(1.0, cTGph, "Gai", *in.hpVertex, "Gkc", 0.0, "akic");
+      Xakic.contract(1.0, *in.Vhhpp, "lkdc", Tabij, "adil", 1.0, "akic");
+      Xakic.contract(-0.5,*in.Vhhpp, "lkcd", Tabij, "adil", 1.0, "akic");
 
       Rabij.contract(2.0, Xakic, "akic", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakic, "akic", Tabij, "bckj", 1.0, "abij");
@@ -179,11 +174,11 @@ namespace Ccsd{
 
       // Xakci
       chrono["ccsd - akci"].start();
-      Gpp.sum(1.0, cTppVertex, "Gab", 0.0, "Gab");
-      Gpp.contract(-1.0, cThpVertex, "Glc", Tai, "al", 1.0, "Gac");
+      cTGpp.sum(1.0, cTppVertex, "Gab", 0.0, "Gab");
+      cTGpp.contract(-1.0, cThpVertex, "Glc", Tai, "al", 1.0, "Gac");
       Ghh.sum(1.0, *in.hhVertex, "Gij", 0.0, "Gij");
       Ghh.contract(1.0, *in.hpVertex, "Gkd", Tai, "di", 1.0, "Gki");
-      Xakci.contract( 1.0, Gpp, "Gac", Ghh, "Gki", 0.0, "akci");
+      Xakci.contract( 1.0, cTGpp, "Gac", Ghh, "Gki", 0.0, "akci");
       Xakci.contract(-0.5, *in.Vhhpp, "lkcd", Tabij, "dail", 1.0, "akci");
       Rabij.contract(-1.0, Xakci, "akci", Tabij, "cbkj", 1.0, "abij");
       Rabij.contract(-1.0, Xakci, "bkci", Tabij, "ackj", 1.0, "abij");
@@ -207,9 +202,10 @@ namespace Ccsd{
         int iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, (int) p);
         int y = iEnd - iStart;
         slcTppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
+        slcTppVertex[i]->relabelBlocks(minusq, slcTppVertex[i]->nonZeroCondition);
 
         slcTppVertex[i]->slice(
-          {0,0,0}, {g,y,p}, 0.0, Gpp, {0,iStart,0}, {g,iEnd,p}, 1.0
+          {0,0,0}, {g,y,p}, 0.0, cTGpp, {0,iStart,0}, {g,iEnd,p}, 1.0
         );
       }
       Gpp.sum(1.0, *in.ppVertex, "Gab", 0.0, "Gab");
@@ -272,14 +268,10 @@ namespace Ccsd{
       Rai.contract( 2.0, *in.Vphhp, "akic", Tai, "ck", 1.0, "ai");
       Rai.contract(-1.0, *in.Vphph, "akci", Tai, "ck", 1.0, "ai");
 
-//TODO:The following four lines have to be replaced by the CCSDREF implementation
-//    (because of the flawed logic in ctf-bs)
-//      Gph.contract( 1.0, *in.hpVertex, "Gkd", Xabij, "cdik", 0.0, "Gci",true);
-//      Rai.contract( 2.0, cTppVertex, "Gca", Gph, "Gci", 1.0, "ai",true);
-//      Gph.contract( 1.0, *in.hpVertex, "Gkc", Xabij, "cdik", 0.0, "Gdi");
-//      Rai.contract(-1.0, cTppVertex, "Gad", Gph, "Gdi", 1.0, "ai");
-      Rai.contract( 2.0, *in.Vphpp, "akcd", Xabij, "cdik", 1.0, "ai");
-      Rai.contract(-1.0, *in.Vphpp, "akdc", Xabij, "cdik", 1.0, "ai");
+      Gph.contract( 1.0, *in.hpVertex, "Gkd", Xabij, "cdik", 0.0, "Gci");
+      Rai.contract( 2.0, cTppVertex, "Gac", Gph, "Gci", 1.0, "ai");
+      Gph.contract( 1.0, *in.hpVertex, "Gkc", Xabij, "cdik", 0.0, "Gdi");
+      Rai.contract(-1.0, cTppVertex, "Gad", Gph, "Gdi", 1.0, "ai");
 
       Rai.contract(-2.0, *in.Vhhhp, "klic", Xabij, "ackl", 1.0, "ai");
       Rai.contract( 1.0, *in.Vhhhp, "lkic", Xabij, "ackl", 1.0, "ai");

@@ -5,13 +5,13 @@
 namespace Integrals{
   Complex conjo(Complex x){ return std::conj(x); }
 
-  std::function<int(const ivec &, const ivec &)>
-  compare(const ivec p)
+  std::function<bool(const std::vector<size_t> &, const std::vector<size_t> &)>
+  _compare(const std::vector<size_t> p)
   {
-    return [p] (const ivec &a, const ivec &b) -> int {
-      size_t n(a.size());
-      ivec c(n), d(n);
-      for (size_t i(0); i < n - 1; i++){
+    return [p] (const std::vector<size_t> &a, const std::vector<size_t> &b) -> bool {
+      size_t n(p.size());
+      std::vector<size_t> c(n), d(n);
+      for (size_t i(0); i < n; i++){
         c[i] = a[p[i]]; d[i] = b[p[i]];
       }
       return c < d;
@@ -39,28 +39,30 @@ namespace Integrals{
     tensor<Complex> conjGpp(3, gpp, nzc3, cc4x::dw, "cGpp");
 
     std::function<Complex(const Complex)> fConj(&conjo);
-    auto flip(in.hp->nonZeroCondition);
+    auto flip(in.hp->nzc);
+    std::vector<size_t> remap(in.hp->nzc.size());
 
     // sort in a way that the second column in the fastest, third second fastest
     // sorting like that introduces a flip from ia->ai of the nonZeroConditions
-    std::sort(flip.begin(), flip.end(), compare({1,2,0}));
+    std::sort(flip.begin(), flip.end(), _compare({1,2,0}));
+    for (size_t i(0); i < nzc3.size(); i++) remap[i] = flip[i].back();
 
 
     chrono["Integrals - pre"].start();
-    conjGhp.sum(1.0, *in.ph, "Gai", 0.0, "Gia", in.ph->nonZeroCondition, flip, fConj);
-    conjGph.sum(1.0, *in.hp, "Gia", 0.0, "Gai", in.hp->nonZeroCondition, flip, fConj);
-    conjGhh.sum(1.0, *in.hh, "Gia", 0.0, "Gai", in.hh->nonZeroCondition, flip, fConj);
-    conjGpp.sum(1.0, *in.pp, "Gia", 0.0, "Gai", in.pp->nonZeroCondition, flip, fConj);
+    conjGhp.sum(1.0, *in.ph, "Gai", 0.0, "Gia", remap, fConj);
+    conjGph.sum(1.0, *in.hp, "Gia", 0.0, "Gai", remap, fConj);
+    conjGhh.sum(1.0, *in.hh, "Gia", 0.0, "Gai", remap, fConj);
+    conjGpp.sum(1.0, *in.pp, "Gia", 0.0, "Gai", remap, fConj);
 
-    auto minusGhh(conjGhp.nonZeroCondition);
+    auto minusGhh(conjGhp.nzc);
     for (auto &e: minusGhh) e[0] = cc4x::kmesh->getMinusIdx(e[0]);
-    conjGhh.relabelBlocks(minusGhh, conjGhh.nonZeroCondition);
-    conjGhp.relabelBlocks(minusGhh, conjGhp.nonZeroCondition);
-    conjGph.relabelBlocks(minusGhh, conjGph.nonZeroCondition);
-    conjGpp.relabelBlocks(minusGhh, conjGpp.nonZeroCondition);
+    conjGhh.relabelBlocks(minusGhh);
+    conjGhp.relabelBlocks(minusGhh);
+    conjGph.relabelBlocks(minusGhh);
+    conjGpp.relabelBlocks(minusGhh);
 
     chrono["Integrals - pre"].stop();
-    int64_t h(cc4x::No), p(cc4x::Nv);
+    size_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto Vpphh = new tensor<Complex>(4, {p,p,h,h}, nzc4, cc4x::dw, "Vpphh");
     auto Vphhp = new tensor<Complex>(4, {p,h,h,p}, nzc4, cc4x::dw, "Vphhp");

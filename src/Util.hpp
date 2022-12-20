@@ -13,8 +13,6 @@
 #define UTIL_DEFINED
 
 
-using ivec = std::vector<int>;
-using i64vec = std::vector<int64_t>;
 using Complex = std::complex<double>;
 
 #define THROW(msg) std::cout << msg << std::endl; throw msg;

@@ -5,13 +5,13 @@
 
 namespace Ccsd{
   Complex conjo(Complex x){ return std::conj(x); }
-  std::function<int(const ivec &, const ivec &)>
-  compare(const ivec p)
+  std::function<bool(const std::vector<size_t> &, const std::vector<size_t> &)>
+  _compare(const std::vector<size_t> p)
   {
-    return [p] (const ivec &a, const ivec &b) -> int {
-      size_t n(a.size());
-      ivec c(n), d(n);
-      for (size_t i(0); i < n - 1; i++){
+    return [p] (const std::vector<size_t> &a, const std::vector<size_t> &b) -> bool {
+      size_t n(p.size());
+      std::vector<size_t> c(n), d(n);
+      for (size_t i(0); i < n; i++){
         c[i] = a[p[i]]; d[i] = b[p[i]];
       }
       return c < d;
@@ -42,7 +42,7 @@ namespace Ccsd{
       THROW("Input of Ccsd not valid");
     }
 
-		int64_t h(cc4x::No), p(cc4x::Nv), g(in.ppVertex->lens[0]);
+    auto h(cc4x::No), p(cc4x::Nv), g(in.ppVertex->lens[0]);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto nzc3(cc4x::kmesh->getNZC(3));
     auto nzc2(cc4x::kmesh->getNZC(2));
@@ -84,29 +84,31 @@ namespace Ccsd{
     tensor<Complex> cTGpp(3, {g,p,p}, nzc3, cc4x::dw, "ctGpp");
     tensor<Complex> cTGph(3, {g,p,h}, nzc3, cc4x::dw, "ctGph");
 
-    auto minusq(cThhVertex.nonZeroCondition);
+    auto minusq(cThhVertex.nzc);
     for (auto &e: minusq) e[0] = cc4x::kmesh->getMinusIdx(e[0]);
 
-    cTGpp.relabelBlocks(minusq, cTGpp.nonZeroCondition);
-    cTGph.relabelBlocks(minusq, cTGph.nonZeroCondition);
+    cTGpp.relabelBlocks(minusq);
+    cTGph.relabelBlocks(minusq);
 
     tensor<Complex> G(1, {g}, nzc1, cc4x::dw, "G");
 
     std::function<Complex(const Complex)> fConj(&conjo);
-    auto flip(in.hpVertex->nonZeroCondition);
+    auto flip(in.hpVertex->nzc);
+
     // sort in a way that the second column in the fastest, third second fastest
     // sorting like that introduces a flip from ia->ai of the nonZeroConditions
-    std::sort(flip.begin(), flip.end(), compare({1,2,0}));
+    std::sort(flip.begin(), flip.end(), _compare({1,2,0}));
+    std::vector<size_t> remap;
+    for (auto &f: flip) remap.push_back(f.back());
+    cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", remap, fConj);
+    cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", remap, fConj);
+    cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", remap, fConj);
+    cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", remap, fConj);
 
-    cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", in.hhVertex->nonZeroCondition, flip, fConj);
-    cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", in.hpVertex->nonZeroCondition, flip, fConj);
-    cThpVertex.sum(1.0, *in.phVertex, "gij", 1.0, "gji", in.phVertex->nonZeroCondition, flip, fConj);
-    cTppVertex.sum(1.0, *in.ppVertex, "gij", 1.0, "gji", in.ppVertex->nonZeroCondition, flip, fConj);
-
-    cThhVertex.relabelBlocks(minusq, cThhVertex.nonZeroCondition);
-    cTphVertex.relabelBlocks(minusq, cTphVertex.nonZeroCondition);
-    cThpVertex.relabelBlocks(minusq, cThpVertex.nonZeroCondition);
-    cTppVertex.relabelBlocks(minusq, cTppVertex.nonZeroCondition);
+    cThhVertex.relabelBlocks(minusq);
+    cTphVertex.relabelBlocks(minusq);
+    cThpVertex.relabelBlocks(minusq);
+    cTppVertex.relabelBlocks(minusq);
 
 
 
@@ -193,16 +195,16 @@ namespace Ccsd{
       // Xabcd
       chrono["ccsd - pp-ladder"].start();
       //number of slices
-      int nS(int(std::ceil(1.0*p/cc4x::Nx)));
+      size_t nS(size_t(std::ceil(1.0*p/cc4x::Nx)));
       //prepare the dressed vertices in a vector
       std::vector<tensor<Complex> *> slcTppVertex(nS);
       std::vector<tensor<Complex> *> slppVertex(nS);
 
-      for (int i(0); i < nS; i++){
-        int iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, (int) p);
-        int y = iEnd - iStart;
+      for (size_t i(0); i < nS; i++){
+        auto iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, p);
+        auto y = iEnd - iStart;
         slcTppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
-        slcTppVertex[i]->relabelBlocks(minusq, slcTppVertex[i]->nonZeroCondition);
+        slcTppVertex[i]->relabelBlocks(minusq);
 
         slcTppVertex[i]->slice(
           {0,0,0}, {g,y,p}, 0.0, cTGpp, {0,iStart,0}, {g,iEnd,p}, 1.0
@@ -210,19 +212,19 @@ namespace Ccsd{
       }
       Gpp.sum(1.0, *in.ppVertex, "Gab", 0.0, "Gab");
       Gpp.contract(-1.0, *in.hpVertex, "Gkb", Tai, "ak", 1.0, "Gab");
-      for (int i(0); i < nS; i++){
-        int iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, (int) p);
-        int y = iEnd - iStart;
+      for (size_t i(0); i < nS; i++){
+        auto iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, p);
+        auto y = iEnd - iStart;
         slppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
         slppVertex[i]->slice(
           {0,0,0}, {g,y,p}, 0.0, Gpp, {0,iStart,0}, {g,iEnd,p}, 1.0
         );
       }
-      for (int m(0); m < nS; m++)
-      for (int n(m); n < nS; n++){
+      for (size_t m(0); m < nS; m++)
+      for (size_t n(m); n < nS; n++){
         //adapt the size of Vxycd and co
-        int a(n*cc4x::Nx), b(m*cc4x::Nx);
-        int y(slppVertex[m]->lens[1]), x(slcTppVertex[n]->lens[1]);
+        auto a(n*cc4x::Nx), b(m*cc4x::Nx);
+        auto y(slppVertex[m]->lens[1]), x(slcTppVertex[n]->lens[1]);
         tensor<Complex> Vxycd(4, {x,y,p,p}, nzc4, cc4x::dw, "Vxycd");
         tensor<Complex> Rxyij(4, {x,y,h,h}, nzc4, cc4x::dw, "Rxyij");
         tensor<Complex> Ryxji(4, {y,x,h,h}, nzc4, cc4x::dw, "Rxyji");

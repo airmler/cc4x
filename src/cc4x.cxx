@@ -23,11 +23,11 @@ bool cc4x::complexT;
 bool cc4x::drccd;
 bool cc4x::ccsd;
 bool cc4x::ref;
-int cc4x::No;
-int cc4x::Nv;
-int cc4x::Nx;
-int cc4x::NF;
-int cc4x::iterations;
+size_t cc4x::No;
+size_t cc4x::Nv;
+size_t cc4x::Nx;
+size_t cc4x::NF;
+size_t cc4x::iterations;
 CTF::World * cc4x::dw = NULL;
 kMesh * cc4x::kmesh = NULL;
 
@@ -51,7 +51,7 @@ int main(int argc, char **argv){
   app.add_option("-v, --virtuals"
                 , cc4x::Nv, "Number of virtual  orbitals")->default_val(0);
   app.add_option("-g, --auxiliaryGrid"
-		, cc4x::NF, "Number of auxiliary filed variables")->default_val(-1);
+                , cc4x::NF, "Number of auxiliary filed variables")->default_val(0);
   app.add_option("-r, --wignerSeitz"
                 , rs, "Wigner-Seitz radius")->default_val(rs);
   app.add_flag("-d, --drccd", cc4x::drccd
@@ -61,7 +61,7 @@ int main(int argc, char **argv){
   app.add_flag("-f, --ref", cc4x::ref
               , "Using ccsd reference implementiation")->default_val(false);
   app.add_option("-x, --Nx", cc4x::Nx
-                , "Dimension of ppl slice size")->default_val(-1);
+                , "Dimension of ppl slice size")->default_val(0);
   app.add_option("-i, --iterations", cc4x::iterations
                 , "Number of SCF iterations")->default_val(10);
   try {
@@ -166,7 +166,7 @@ int main(int argc, char **argv){
     }
     if (cc4x::ccsd && !cc4x::ref)
     {
-      if (cc4x::Nx <= 0) cc4x::Nx = cc4x::No;
+      if (cc4x::Nx == 0) cc4x::Nx = cc4x::No;
       LOG() << "ccsd with slice size " << cc4x::Nx << std::endl;
       Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
       Ccsd::output out({});

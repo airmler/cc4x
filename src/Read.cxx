@@ -45,7 +45,7 @@ namespace Read{
       auto meta = yamlFile["metaData"];
       if (meta["No"]) y.No = meta["No"].as<int>();
       if (meta["Nv"]) y.Nv = meta["Nv"].as<int>();
-      if (meta["kMesh"]) y.kMesh = meta["kMesh"].as<ivec>();
+      if (meta["kMesh"]) y.kMesh = meta["kMesh"].as< std::vector<size_t> >();
       if (meta["halfGrid"]) y.halfGrid = meta["halfGrid"].as<int>();
     }
     return y;
@@ -89,10 +89,10 @@ namespace Read{
       }
       file.close();
       auto Np(cc4x::No + cc4x::Nv);
-      std::vector<int64_t> idx(Np);
+      std::vector<size_t> idx(Np);
       if (!cc4x::dw->rank) std::iota(idx.begin(), idx.end(), 0);
-      if (cc4x::dw->rank)  d->write(0, idx.data(), data.data());
-      else                 d->write(Np, idx.data(), data.data());
+      if (cc4x::dw->rank)  d->write(0, idx, data);
+      else                 d->write(Np, idx, data);
     } else {
       MPI_File file;
       MPI_File_open(

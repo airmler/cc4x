@@ -14,9 +14,9 @@ namespace Scf{
     std::complex<double> direct, exchange;
     energy.contract(2.0, T, "abij", V, "ijab", 0.0, "");
     //std::memcpy(&direct, energy.tensors[0]->data, sizeof(Complex));
-    energy.read_all(&direct);
+    energy.read(direct);
     energy.contract(-1.0, T, "abij", V, "jiab", 0.0, "");
-    energy.read_all(&exchange);
+    energy.read(exchange);
     int Nk(cc4x::kmesh->Nk);
     if (what.size()) LOG() << what << "\n";
     LOG() << "Energy (d/x): " << real(direct+exchange)/Nk;

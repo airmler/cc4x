@@ -20,7 +20,7 @@ namespace Drccd{
       THROW("Input of Drccd not valid");
     }
 
-    int64_t h(cc4x::No), p(cc4x::Nv);
+    auto h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
     tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");

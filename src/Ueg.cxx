@@ -4,7 +4,13 @@
 #include <cc4x.hpp>
 
 
+
 namespace Ueg{
+
+  using iarr  = array<int64_t,3>;
+  using darr  = array<double,4>;
+
+
 
   double evalMadelung(const double v){
     double kappa = pow(v,-1.0/3.0);
@@ -92,10 +98,10 @@ namespace Ueg{
     for (int64_t d(0); d < Np; d++)
       energies[d] = {dGrid[d][3], 0.0};
 
-    std::vector<int64_t> idx(Np);
+    std::vector<size_t> idx(Np);
     if (!cc4x::dw->rank) std::iota(idx.begin(), idx.end(), 0);
-    if (cc4x::dw->rank)  eps->write(0,  idx.data(), energies.data());
-    else                 eps->write(Np, idx.data(), energies.data());
+    if (cc4x::dw->rank)  eps->write(0,  idx, energies);
+    else                 eps->write(Np, idx, energies);
 
     *out.eps = eps;
 
@@ -176,7 +182,7 @@ namespace Ueg{
 
     idx.resize(vData.size());
     std::iota(idx.begin(), idx.end(), sbegin*Np*NF);
-    cV->write(idx.size(), idx.data(), vData.data());
+    cV->write(idx.size(), idx, vData);
 
 
     *out.coulombVertex = cV;

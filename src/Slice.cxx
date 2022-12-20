@@ -4,14 +4,16 @@
 
 namespace Slice{
 
-  sliceDim getDimensions(i64vec lens, i64vec pp){
+  sliceDim getDimensions( std::vector<size_t> lens
+                        , std::vector<size_t> pp){
     if ( pp.size() != lens.size() ) {
       LOG() << pp.size() << " " << lens.size() << std::endl;
       THROW("Invalid input!");
     }
     auto order(lens.size());
-    std::vector<i64vec> srcBegin(1, i64vec(order));
-    std::vector<i64vec> srcEnd  (1, i64vec(order));
+    std::vector< std::vector<size_t> > srcBegin(1, std::vector<size_t>(order));
+    std::vector< std::vector<size_t> > srcEnd(1, std::vector<size_t>(order));
+
     for (size_t i(0); i < order; i++){
       // edge gets slices....
       if (pp[i] > 0 && pp[i] < lens[i]) {
@@ -33,8 +35,9 @@ namespace Slice{
       }
     }
     // destination always begins with 0, right
-    std::vector<i64vec> dstBegin(srcBegin.size(), i64vec(order));
-    std::vector<i64vec> dstEnd(srcEnd);
+    std::vector< std::vector<size_t> >
+      dstBegin(srcBegin.size(), std::vector<size_t>(order));
+    std::vector< std::vector<size_t> > dstEnd(srcEnd);
     for (size_t s(0); s < dstEnd.size(); s++)
     for (size_t o(0); o < order; o++)
       dstEnd[s][o] = srcEnd[s][o] - srcBegin[s][o];

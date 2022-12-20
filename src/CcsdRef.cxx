@@ -26,7 +26,7 @@ namespace CcsdRef{
       THROW("Input of CcsdRef not valid");
     }
 
-		int64_t h(cc4x::No), p(cc4x::Nv);
+    size_t h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto nzc3(cc4x::kmesh->getNZC(3));
     auto nzc2(cc4x::kmesh->getNZC(2));

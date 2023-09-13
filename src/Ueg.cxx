@@ -45,11 +45,9 @@ namespace Ueg{
   void run(input const& in, output& out){
     auto No(in.No), Nv(in.Nv), Np(No+Nv);
     auto rs(in.rs); auto NF(in.NF);
-
     cc4x::No = No;
     cc4x::Nv = Nv;
     cc4x::complexT = true;
-    cc4x::kmesh = new kMesh({1,1,1});
     int64_t maxG = std::pow(5.0*Np,1.0/3.0);
     std::vector<iarr> iGrid;
     for (int64_t g1(-maxG); g1 <= maxG; g1++)
@@ -92,11 +90,14 @@ namespace Ueg{
     LOG() << "Hartree Fock energy: " << refE/No/2 << " Ha per electron\n";
     LOG() << "HOMO: " << dGrid[No-1][3] << " , LUMO: " << dGrid[No][3] << '\n';
     // work on the eigen energies
-    std::vector<Complex> energies(Np);
+    // We have to perform a hack here and make the energy vector larger
+    auto _Nk(cc4x::kmesh->Nk);
+    std::vector<Complex> energies(Np*_Nk);
     auto eps = new tensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::dw, "eps");
 
+    for (int64_t k(0); k < _Nk; k++)
     for (int64_t d(0); d < Np; d++)
-      energies[d] = {dGrid[d][3], 0.0};
+      energies[d + k*Np] = {dGrid[d][3], 0.0};
 
     std::vector<size_t> idx(Np);
     if (!cc4x::dw->rank) std::iota(idx.begin(), idx.end(), 0);
@@ -129,7 +130,7 @@ namespace Ueg{
       if ( sL(t) > maxR ) continue;
       momMap[t] = index++;
     }
-    if (NF < 0) {
+    if (NF == 0) {
       NF = momMap.size();
       cc4x::NF = NF;
     }
@@ -182,7 +183,8 @@ namespace Ueg{
 
     idx.resize(vData.size());
     std::iota(idx.begin(), idx.end(), sbegin*Np*NF);
-    cV->write(idx.size(), idx, vData);
+    for (auto k(0); k < _Nk; k++)
+      cV->write(idx.size(), idx, vData, k);
 
 
     *out.coulombVertex = cV;

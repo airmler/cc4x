@@ -118,6 +118,13 @@
         machine_tensor->write(npair, global_idx, data);
       }
 
+      void write(size_t                    npair,
+                 std::vector<size_t> const global_idx,
+                 std::vector<F>      const data,
+                 int64_t             const block){
+        machine_tensor->write(npair, global_idx, data, block);
+      }
+
       void read(size_t                    npair,
                 std::vector<size_t> const global_idx,
                 std::vector<F>            data){

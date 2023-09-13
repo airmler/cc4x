@@ -46,6 +46,7 @@ int main(int argc, char **argv){
   usage += "      and EigenEnergies.yaml in the current directory\n";
   CLI::App app{usage};
   double rs(-1.0);
+  std::vector<size_t> _kmesh({1,1,1});
   app.add_option("-o, --occupied", cc4x::No
                 , "Number of occupied orbitals")->default_val(0);
   app.add_option("-v, --virtuals"
@@ -54,6 +55,7 @@ int main(int argc, char **argv){
                 , cc4x::NF, "Number of auxiliary filed variables")->default_val(0);
   app.add_option("-r, --wignerSeitz"
                 , rs, "Wigner-Seitz radius")->default_val(rs);
+  app.add_option("-m, --mesh", _kmesh, "k-Mesh")->default_val(_kmesh);
   app.add_flag("-d, --drccd", cc4x::drccd
               , "Calculate drccd amplitude equations")->default_val(false);
   app.add_flag("-c, --ccsd", cc4x::ccsd
@@ -126,6 +128,8 @@ int main(int argc, char **argv){
       if (cc4x::No == 0 || cc4x::Nv == 0) {
         THROW("Setting rs > 0 requires specification of No && Nv");
       }
+      cc4x::kmesh = new kMesh(_kmesh);
+
       Ueg::input in({cc4x::No, cc4x::Nv, cc4x::NF, rs});
       Ueg::output out({&coulombVertex, &eps});
       Ueg::run(in, out);

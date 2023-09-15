@@ -4,15 +4,15 @@
 
 namespace Slice{
 
-  sliceDim getDimensions( std::vector<size_t> lens
-                        , std::vector<size_t> pp){
+  sliceDim getDimensions( std::vector<int64_t> lens
+                        , std::vector<int64_t> pp){
     if ( pp.size() != lens.size() ) {
       LOG() << pp.size() << " " << lens.size() << std::endl;
       THROW("Invalid input!");
     }
     auto order(lens.size());
-    std::vector< std::vector<size_t> > srcBegin(1, std::vector<size_t>(order));
-    std::vector< std::vector<size_t> > srcEnd(1, std::vector<size_t>(order));
+    std::vector< std::vector<int64_t> > srcBegin(1, std::vector<int64_t>(order));
+    std::vector< std::vector<int64_t> > srcEnd(1, std::vector<int64_t>(order));
 
     for (size_t i(0); i < order; i++){
       // edge gets slices....
@@ -35,9 +35,9 @@ namespace Slice{
       }
     }
     // destination always begins with 0, right
-    std::vector< std::vector<size_t> >
-      dstBegin(srcBegin.size(), std::vector<size_t>(order));
-    std::vector< std::vector<size_t> > dstEnd(srcEnd);
+    std::vector< std::vector<int64_t> >
+      dstBegin(srcBegin.size(), std::vector<int64_t>(order));
+    std::vector< std::vector<int64_t> > dstEnd(srcEnd);
     for (size_t s(0); s < dstEnd.size(); s++)
     for (size_t o(0); o < order; o++)
       dstEnd[s][o] = srcEnd[s][o] - srcBegin[s][o];
@@ -77,26 +77,26 @@ namespace Slice{
 
 
     auto dummyA = new tensor<Complex>(
-      order, slices.dstEnd[0], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice1"
+      order, slices.dstEnd[0], cc4x::kmesh->getNZC(order), cc4x::world, "Slice1"
     );
     dummyA->slice(slices.dstBegin[0], slices.dstEnd[0], 0.0, *in.I, slices.srcBegin[0], slices.srcEnd[0], 1.0);
     *out.A = dummyA;
 
     auto dummyB = new tensor<Complex>(
-      order, slices.dstEnd[1], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice2"
+      order, slices.dstEnd[1], cc4x::kmesh->getNZC(order), cc4x::world, "Slice2"
     );
     dummyB->slice(slices.dstBegin[1], slices.dstEnd[1], 0.0, *in.I, slices.srcBegin[1], slices.srcEnd[1], 1.0);
     *out.B = dummyB;
 
     if (slices.dstBegin.size() == 2) return;
     auto dummyC = new tensor<Complex>(
-      order, slices.dstEnd[2], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice3"
+      order, slices.dstEnd[2], cc4x::kmesh->getNZC(order), cc4x::world, "Slice3"
     );
     dummyC->slice(slices.dstBegin[2], slices.dstEnd[2], 0.0, *in.I, slices.srcBegin[2], slices.srcEnd[2], 1.0);
     *out.C = dummyC;
 
     auto dummyD = new tensor<Complex>(
-      order, slices.dstEnd[3], cc4x::kmesh->getNZC(order), cc4x::dw, "Slice4"
+      order, slices.dstEnd[3], cc4x::kmesh->getNZC(order), cc4x::world, "Slice4"
     );
     dummyD->slice(slices.dstBegin[3], slices.dstEnd[3], 0.0, *in.I, slices.srcBegin[3], slices.srcEnd[3], 1.0);
     *out.D = dummyD;

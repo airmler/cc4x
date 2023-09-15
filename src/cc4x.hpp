@@ -1,4 +1,3 @@
-#include <ctf.hpp>
 #include <Kmesh.hpp>
 
 #ifndef CC4X_DEFINED
@@ -11,12 +10,12 @@ class cc4x {
    static bool drccd;
    static bool ccsd;
    static bool ref;
-   static size_t No;
-   static size_t Nv;
-   static size_t Nx;
-   static size_t NF;
-   static size_t iterations;
-   static CTF::World *dw;
+   static int64_t No;
+   static int64_t Nv;
+   static int64_t Nx;
+   static int64_t NF;
+   static int64_t iterations;
+   static World * world;
    static kMesh *kmesh;
 };
 

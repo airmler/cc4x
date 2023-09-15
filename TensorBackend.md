@@ -1,3 +1,31 @@
+# Description of the World API
+
+- A world should just be a struct.
+
+Every tensor API should also define a World type, following the API
+in this document.
+
+How the implementation of this world is made is up to the writer of the API.
+For instance in the case off CTF
+
+```c++
+
+class World {
+  // this member of the class should only be visible
+  // from eiter this class or from the tensor.
+  // No call from the code should be able to see this member.
+  CTF::World world;
+
+};
+
+template <typename F>
+class tensor {
+  public:
+    World world;
+};
+
+```
+
 # Description of the tensor API
 
 In the following the type `F` is the tensor template type
@@ -31,7 +59,7 @@ Tensor(int                                      order,
 - `wrld` currently still the CTF world
 - `name` name of the tensor
 
-For a simple matrix the constructor would read ```M(2, {40,50}, {0, 0}, wrld_, "M");``` 
+For a simple matrix the constructor would read ```M(2, {40,50}, {0, 0}, wrld_, "M");```
 Have a look at ```tensor-backends/ctf.hpp:21``` to see how to handle non-zero conditions if the underlying backend does not support block sparsity.
 
 ## Member functions
@@ -122,7 +150,7 @@ is done. If the framework does not support block sparsity the nonZeroConditions 
 ### Read from file
 
 ```cpp
-void 
+void
 read_dense_from_file(MPI_File &file);
 ```
 Object reads data from MPI File.
@@ -146,7 +174,7 @@ read_all(F *data);
 ```
 Object writes the whole tensor data to pointer ```data```. Note: this is done on every rank (i.e. not memory scalable).
 
-### The slice function 
+### The slice function
 
 ```cpp
 void
@@ -159,12 +187,12 @@ slice(std::vector<int64_t> const offsets,
       F                          alpha );
 ```
 
-The object ```C``` when calling 
+The object ```C``` when calling
 ```cpp
 C.slice( ... )
 ```
-adds to a slice of this tensor 
+adds to a slice of this tensor
 ```
-C[offsets,ends)=beta*B[offsets,ends) + alpha*A[offsets_A,ends_A) 
+C[offsets,ends)=beta*B[offsets,ends) + alpha*A[offsets_A,ends_A)
 ```
 

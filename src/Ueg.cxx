@@ -93,15 +93,15 @@ namespace Ueg{
     // We have to perform a hack here and make the energy vector larger
     auto _Nk(cc4x::kmesh->Nk);
     std::vector<Complex> energies(Np*_Nk);
-    auto eps = new tensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::dw, "eps");
+    auto eps = new tensor<Complex>(1, {Np}, cc4x::kmesh->getNZC(1), cc4x::world, "eps");
 
     for (int64_t k(0); k < _Nk; k++)
     for (int64_t d(0); d < Np; d++)
       energies[d + k*Np] = {dGrid[d][3], 0.0};
 
-    std::vector<size_t> idx(Np);
-    if (!cc4x::dw->rank) std::iota(idx.begin(), idx.end(), 0);
-    if (cc4x::dw->rank)  eps->write(0,  idx, energies);
+    std::vector<int64_t> idx(Np);
+    if (!cc4x::world->rank) std::iota(idx.begin(), idx.end(), 0);
+    if (cc4x::world->rank)  eps->write(0,  idx, energies);
     else                 eps->write(Np, idx, energies);
 
     *out.eps = eps;
@@ -135,7 +135,7 @@ namespace Ueg{
       cc4x::NF = NF;
     }
 
-    auto cV = new tensor<Complex>(3, {NF,Np,Np}, cc4x::kmesh->getNZC(3), cc4x::dw, "cVertex");
+    auto cV = new tensor<Complex>(3, {NF,Np,Np}, cc4x::kmesh->getNZC(3), cc4x::world, "cVertex");
 
 
     // Writing CoulombVertex to buffer
@@ -143,8 +143,8 @@ namespace Ueg{
     // not be able to write it to a ctf tensor
     double fac(4.0*M_PI/v);
 
-    int64_t np = cc4x::dw->np;
-    int64_t rank = cc4x::dw->rank;
+    int64_t np = cc4x::world->np;
+    int64_t rank = cc4x::world->rank;
     // We slice the number of states for all the mpi processes
     int64_t slices(Np/np);
     std::vector<size_t> slicePerRank(np);

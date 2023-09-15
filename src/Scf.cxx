@@ -10,13 +10,13 @@ namespace Scf{
     tensor<Complex> &T, tensor<Complex> &V, std::string what
   ){
 
-    tensor<Complex> energy(0, {}, cc4x::kmesh->getNZC(0), cc4x::dw, "e");
+    tensor<Complex> energy(0, {}, cc4x::kmesh->getNZC(0), cc4x::world, "e");
     std::complex<double> direct, exchange;
     energy.contract(2.0, T, "abij", V, "ijab", 0.0, "");
     //std::memcpy(&direct, energy.tensors[0]->data, sizeof(Complex));
-    energy.read(direct);
+    energy.read(&direct);
     energy.contract(-1.0, T, "abij", V, "jiab", 0.0, "");
-    energy.read(exchange);
+    energy.read(&exchange);
     int Nk(cc4x::kmesh->Nk);
     if (what.size()) LOG() << what << "\n";
     LOG() << "Energy (d/x): " << real(direct+exchange)/Nk;

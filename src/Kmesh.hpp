@@ -7,21 +7,21 @@
 
 class kMesh {
   public:
-   size_t Nk;
-   std::vector<size_t> mesh;
+   int64_t Nk;
+   std::vector<int64_t> mesh;
 
 
    kMesh();
-   kMesh(std::vector<size_t> _mesh);
+   kMesh(std::vector<int64_t> _mesh);
 
-   size_t backfold(const size_t i, const size_t N);
-   std::vector<size_t> backfold(const std::vector<size_t> v);
-   size_t kToIdx(const std::vector<size_t> kPoint);
-   std::vector<size_t> idxToK(const size_t i);
-   size_t idxMinusIdx(const size_t i, const size_t j);
-   size_t getForthIdx(const size_t k, const size_t i, const size_t j);
-   size_t getMinusIdx(const size_t i);
-   std::vector< std::vector<size_t> > getNZC(const size_t d);
+   int64_t backfold(const int64_t i, const int64_t N);
+   std::vector<int64_t> backfold(const std::vector<int64_t> v);
+   int64_t kToIdx(const std::vector<int64_t> kPoint);
+   std::vector<int64_t> idxToK(const int64_t i);
+   int64_t idxMinusIdx(const int64_t i, const int64_t j);
+   int64_t getForthIdx(const int64_t k, const int64_t i, const int64_t j);
+   int64_t getMinusIdx(const int64_t i);
+   std::vector< std::vector<int64_t> > getNZC(const int64_t d);
    void print();
 };
 

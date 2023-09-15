@@ -6,7 +6,7 @@
 
 namespace Ueg {
   struct input {
-    size_t No, Nv, NF;
+    int64_t No, Nv, NF;
     double rs;
   };
   struct output {

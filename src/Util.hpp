@@ -2,7 +2,6 @@
 #include <string>
 #include <complex>
 #include <fstream>
-#include <ctf.hpp>
 #include <Tensor.hpp>
 #include <iomanip>
 #include <yaml-cpp/yaml.h>
@@ -17,7 +16,7 @@ using Complex = std::complex<double>;
 
 #define THROW(msg) std::cout << msg << std::endl; throw msg;
 
-#define LOG() if (!cc4x::dw->rank) std::cout << std::setprecision(8)
+#define LOG() if (!cc4x::world->rank) std::cout << std::setprecision(8)
 
 // taken from Atrip code of AGallo
 struct Timer {

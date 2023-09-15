@@ -7,7 +7,7 @@
 namespace Slice {
   struct input {
     tensor<Complex> *I;
-    std::vector<size_t> partitionPoint;
+    std::vector<int64_t> partitionPoint;
   };
   struct output {
     tensor<Complex> **A;
@@ -18,10 +18,10 @@ namespace Slice {
   void run(input const& in, output &out);
 
   struct sliceDim {
-    std::vector< std::vector<size_t> > srcBegin;
-    std::vector< std::vector<size_t> > srcEnd;
-    std::vector< std::vector<size_t> > dstBegin;
-    std::vector< std::vector<size_t> > dstEnd;
+    std::vector< std::vector<int64_t> > srcBegin;
+    std::vector< std::vector<int64_t> > srcEnd;
+    std::vector< std::vector<int64_t> > dstBegin;
+    std::vector< std::vector<int64_t> > dstEnd;
   };
 }
 

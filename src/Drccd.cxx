@@ -22,13 +22,14 @@ namespace Drccd{
 
     auto h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
-    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
-    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
-    tensor<Complex> Calid(4, {p,h,h,p}, nzc4, cc4x::dw, "Calid");
-    tensor<Complex> Xijab(4, {h,h,p,p}, nzc4, cc4x::dw, "Xijab");
+    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::world, "Dabij");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::world, "Rabij");
+    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::world, "Tabij");
+    tensor<Complex> Calid(4, {p,h,h,p}, nzc4, cc4x::world, "Calid");
+    tensor<Complex> Xijab(4, {h,h,p,p}, nzc4, cc4x::world, "Xijab");
 
-    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Kabij");
+    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::world, "Kabij");
+
     Scf::getDabij(Dabij, *in.epsi, *in.epsa);
 
     Tabij.contract(1.0, Dabij, "abij", *in.Vpphh, "abij", 0.0, "abij");

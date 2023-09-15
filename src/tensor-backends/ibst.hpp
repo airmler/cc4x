@@ -2,7 +2,12 @@
 #include <ibst.h>
 #include <ctf.hpp>
 
+  class World {
+   public:
+    ibst::iWorld * ibst_world;
+    static ibst::iWorld wrld(bool dryRun);
 
+  };
 
   template <typename F>
   class tensor {
@@ -12,13 +17,14 @@
       tensor(size_t const                       _order,
              std::vector<size_t>  const         _lens,
              std::vector< std::vector<size_t> > const _nzc,
-             CTF::World *                       wrld,
+             World       &                      _wrld,
              std::string const                  _name) {
 
         nzc = _nzc;
         lens = _lens;
         machine_tensor =
-          new ibst::Tensor<F>(_order, lens, nzc, wrld, _name);
+//          new ibst::Tensor<F>(_order, lens, nzc, _name);
+          new ibst::Tensor<F>(_order, lens, nzc, _wrld.wrld, _name);
       }
 
       ~tensor() { delete machine_tensor; };

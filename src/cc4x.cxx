@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 
-#include <ctf.hpp>
 #include <CLI11.hpp>
 
 #include <cc4x.hpp>
@@ -23,12 +22,12 @@ bool cc4x::complexT;
 bool cc4x::drccd;
 bool cc4x::ccsd;
 bool cc4x::ref;
-size_t cc4x::No;
-size_t cc4x::Nv;
-size_t cc4x::Nx;
-size_t cc4x::NF;
-size_t cc4x::iterations;
-CTF::World * cc4x::dw = NULL;
+int64_t cc4x::No;
+int64_t cc4x::Nv;
+int64_t cc4x::Nx;
+int64_t cc4x::NF;
+int64_t cc4x::iterations;
+World * cc4x::world = NULL;
 kMesh * cc4x::kmesh = NULL;
 
 void printSystem(){
@@ -46,7 +45,7 @@ int main(int argc, char **argv){
   usage += "      and EigenEnergies.yaml in the current directory\n";
   CLI::App app{usage};
   double rs(-1.0);
-  std::vector<size_t> _kmesh({1,1,1});
+  std::vector<int64_t> _kmesh({1,1,1});
   app.add_option("-o, --occupied", cc4x::No
                 , "Number of occupied orbitals")->default_val(0);
   app.add_option("-v, --virtuals"
@@ -75,10 +74,7 @@ int main(int argc, char **argv){
   }
   if (cc4x::drccd) cc4x::ccsd = false;
 
-  cc4x::dw = new CTF::World();
-#ifdef CONTRACTION_COLLECTOR
-  CTF::Contraction_collector cc;
-#endif
+  cc4x::world = new World();
 
   tensor<Complex> *eps = NULL_TENSOR;
   tensor<Complex> *coulombVertex = NULL_TENSOR;
@@ -181,11 +177,8 @@ int main(int argc, char **argv){
     LOG() << "WHAT THE FUCK" << std::endl;
   }
 
-#ifdef CONTRACTION_COLLECTOR
-  if (!cc4x::dw->rank) cc.analyze(1);
-#endif
+  delete cc4x::world;
 
-  delete cc4x::dw;
   MPI_Finalize();
   return 0;
 }

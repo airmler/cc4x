@@ -26,35 +26,35 @@ namespace CcsdRef{
       THROW("Input of CcsdRef not valid");
     }
 
-    size_t h(cc4x::No), p(cc4x::Nv);
+    auto h(cc4x::No), p(cc4x::Nv);
     auto nzc4(cc4x::kmesh->getNZC(4));
     auto nzc3(cc4x::kmesh->getNZC(3));
     auto nzc2(cc4x::kmesh->getNZC(2));
     auto nzc1(cc4x::kmesh->getNZC(1));
 
 
-    tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
-    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::dw, "Tai");
-    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
+    tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::world, "Dai");
+    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::world, "Dabij");
+    tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::world, "Tai");
+    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::world, "Tabij");
 
-    tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::dw, "Kac");
-    tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::dw, "Kki");
-    tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::dw, "Lac");
-    tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::dw, "Lki");
-    tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::dw, "Kck");
-    tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::dw, "Xakic");
-    tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::dw, "Xakci");
-    tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::dw, "Xklij");
-    tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::dw, "Xabij");
-    tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
-    tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
+    tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::world, "Kac");
+    tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::world, "Kki");
+    tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::world, "Lac");
+    tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::world, "Lki");
+    tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::world, "Kck");
+    tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::world, "Xakic");
+    tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::world, "Xakci");
+    tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::world, "Xklij");
+    tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::world, "Xabij");
+    tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::world, "Xakij");
+    tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::world, "Xabic");
 
-    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
-    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
-    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
-    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
-    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Kabij");
+    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::world, "Xabij");
+    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::world, "Yabij");
+    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::world, "Rai");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::world, "Rabij");
+    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::world, "Kabij");
 
 
     Scf::getDai(Dai, *in.epsi, *in.epsa);

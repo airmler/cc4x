@@ -5,12 +5,12 @@
 
 namespace Ccsd{
   Complex conjo(Complex x){ return std::conj(x); }
-  std::function<bool(const std::vector<size_t> &, const std::vector<size_t> &)>
-  _compare(const std::vector<size_t> p)
+  std::function<bool(const std::vector<int64_t> &, const std::vector<int64_t> &)>
+  _compare(const std::vector<int64_t> p)
   {
-    return [p] (const std::vector<size_t> &a, const std::vector<size_t> &b) -> bool {
+    return [p] (const std::vector<int64_t> &a, const std::vector<int64_t> &b) -> bool {
       size_t n(p.size());
-      std::vector<size_t> c(n), d(n);
+      std::vector<int64_t> c(n), d(n);
       for (size_t i(0); i < n; i++){
         c[i] = a[p[i]]; d[i] = b[p[i]];
       }
@@ -49,40 +49,40 @@ namespace Ccsd{
     auto nzc1(cc4x::kmesh->getNZC(1));
 
 
-    tensor<Complex> cThhVertex(3, {g,h,h}, nzc3, cc4x::dw, "cTGhh");
-    tensor<Complex> cTphVertex(3, {g,p,h}, nzc3, cc4x::dw, "cTGph");
-    tensor<Complex> cThpVertex(3, {g,h,p}, nzc3, cc4x::dw, "cTGhp");
-    tensor<Complex> cTppVertex(3, {g,p,p}, nzc3, cc4x::dw, "cTGpp");
+    tensor<Complex> cThhVertex(3, {g,h,h}, nzc3, cc4x::world, "cTGhh");
+    tensor<Complex> cTphVertex(3, {g,p,h}, nzc3, cc4x::world, "cTGph");
+    tensor<Complex> cThpVertex(3, {g,h,p}, nzc3, cc4x::world, "cTGhp");
+    tensor<Complex> cTppVertex(3, {g,p,p}, nzc3, cc4x::world, "cTGpp");
 
-    tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::dw, "Dai");
-    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Dabij");
-    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::dw, "Rai");
-    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Rabij");
-    tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::dw, "Tai");
-    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Tabij");
-    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Kabij");
+    tensor<Complex> Dai(2, {p,h}, nzc2, cc4x::world, "Dai");
+    tensor<Complex> Dabij(4, {p,p,h,h}, nzc4, cc4x::world, "Dabij");
+    tensor<Complex> Rai(2, {p,h}, nzc2, cc4x::world, "Rai");
+    tensor<Complex> Rabij(4, {p,p,h,h}, nzc4, cc4x::world, "Rabij");
+    tensor<Complex> Tai(2, {p,h}, nzc2, cc4x::world, "Tai");
+    tensor<Complex> Tabij(4, {p,p,h,h}, nzc4, cc4x::world, "Tabij");
+    tensor<Complex> Kabij(4, {p,p,h,h}, nzc4, cc4x::world, "Kabij");
 
 
-    tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::dw, "Kac");
-    tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::dw, "Kki");
-    tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::dw, "Lac");
-    tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::dw, "Lki");
-    tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::dw, "Kck");
-    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Xabij");
-    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::dw, "Yabij");
-    tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::dw, "Xakic");
-    tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::dw, "Xakci");
-    tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::dw, "Xklij");
-    tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::dw, "Xabij");
-    tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::dw, "Xakij");
-    tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::dw, "Xabic");
+    tensor<Complex> Kac(2, {p,p}, nzc2, cc4x::world, "Kac");
+    tensor<Complex> Kki(2, {h,h}, nzc2, cc4x::world, "Kki");
+    tensor<Complex> Lac(2, {p,p}, nzc2, cc4x::world, "Lac");
+    tensor<Complex> Lki(2, {h,h}, nzc2, cc4x::world, "Lki");
+    tensor<Complex> Kck(2, {p,h}, nzc2, cc4x::world, "Kck");
+    tensor<Complex> Xabij(4, {p,p,h,h}, nzc4, cc4x::world, "Xabij");
+    tensor<Complex> Yabij(4, {p,p,h,h}, nzc4, cc4x::world, "Yabij");
+    tensor<Complex> Xakic(4, {p,h,h,p}, nzc4, cc4x::world, "Xakic");
+    tensor<Complex> Xakci(4, {p,h,p,h}, nzc4, cc4x::world, "Xakci");
+    tensor<Complex> Xklij(4, {h,h,h,h}, nzc4, cc4x::world, "Xklij");
+    tensor<Complex> Xabcd(4, {p,p,p,p}, nzc4, cc4x::world, "Xabij");
+    tensor<Complex> Xakij(4, {p,h,h,h}, nzc4, cc4x::world, "Xakij");
+    tensor<Complex> Xabic(4, {p,p,h,p}, nzc4, cc4x::world, "Xabic");
 
-    tensor<Complex> Ghh(3, {g,h,h}, nzc3, cc4x::dw, "Ghh");
-    tensor<Complex> Gph(3, {g,p,h}, nzc3, cc4x::dw, "Gph");
-    tensor<Complex> Ghp(3, {g,h,p}, nzc3, cc4x::dw, "Ghp");
-    tensor<Complex> Gpp(3, {g,p,p}, nzc3, cc4x::dw, "Gpp");
-    tensor<Complex> cTGpp(3, {g,p,p}, nzc3, cc4x::dw, "ctGpp");
-    tensor<Complex> cTGph(3, {g,p,h}, nzc3, cc4x::dw, "ctGph");
+    tensor<Complex> Ghh(3, {g,h,h}, nzc3, cc4x::world, "Ghh");
+    tensor<Complex> Gph(3, {g,p,h}, nzc3, cc4x::world, "Gph");
+    tensor<Complex> Ghp(3, {g,h,p}, nzc3, cc4x::world, "Ghp");
+    tensor<Complex> Gpp(3, {g,p,p}, nzc3, cc4x::world, "Gpp");
+    tensor<Complex> cTGpp(3, {g,p,p}, nzc3, cc4x::world, "ctGpp");
+    tensor<Complex> cTGph(3, {g,p,h}, nzc3, cc4x::world, "ctGph");
 
     auto minusq(cThhVertex.nzc);
     for (auto &e: minusq) e[0] = cc4x::kmesh->getMinusIdx(e[0]);
@@ -90,7 +90,7 @@ namespace Ccsd{
     cTGpp.relabelBlocks(minusq);
     cTGph.relabelBlocks(minusq);
 
-    tensor<Complex> G(1, {g}, nzc1, cc4x::dw, "G");
+    tensor<Complex> G(1, {g}, nzc1, cc4x::world, "G");
 
     std::function<Complex(const Complex)> fConj(&conjo);
     auto flip(in.hpVertex->nzc);
@@ -98,7 +98,7 @@ namespace Ccsd{
     // sort in a way that the second column in the fastest, third second fastest
     // sorting like that introduces a flip from ia->ai of the nonZeroConditions
     std::sort(flip.begin(), flip.end(), _compare({1,2,0}));
-    std::vector<size_t> remap;
+    std::vector<int64_t> remap;
     for (auto &f: flip) remap.push_back(f.back());
     cThhVertex.sum(1.0, *in.hhVertex, "gij", 1.0, "gji", remap, fConj);
     cTphVertex.sum(1.0, *in.hpVertex, "gij", 1.0, "gji", remap, fConj);
@@ -119,7 +119,7 @@ namespace Ccsd{
 
     Scf::evalEnergy(Tabij, *in.Vhhpp, "MP2");
 
-    for (size_t i(0); i < cc4x::iterations; i++){
+    for (int64_t i(0); i < cc4x::iterations; i++){
       Xabij.sum(1.0, Tabij, "abij", 0.0, "abij");
       Xabij.contract(1.0, Tai, "ai", Tai, "bj", 1.0, "abij");
       Yabij.sum(1.0, Tabij, "abij", 0.0, "abij");
@@ -195,15 +195,15 @@ namespace Ccsd{
       // Xabcd
       chrono["ccsd - pp-ladder"].start();
       //number of slices
-      size_t nS(size_t(std::ceil(1.0*p/cc4x::Nx)));
+      int64_t nS(int64_t(std::ceil(1.0*p/cc4x::Nx)));
       //prepare the dressed vertices in a vector
       std::vector<tensor<Complex> *> slcTppVertex(nS);
       std::vector<tensor<Complex> *> slppVertex(nS);
 
-      for (size_t i(0); i < nS; i++){
+      for (int64_t i(0); i < nS; i++){
         auto iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, p);
         auto y = iEnd - iStart;
-        slcTppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
+        slcTppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::world, "slicecT");
         slcTppVertex[i]->relabelBlocks(minusq);
 
         slcTppVertex[i]->slice(
@@ -212,22 +212,22 @@ namespace Ccsd{
       }
       Gpp.sum(1.0, *in.ppVertex, "Gab", 0.0, "Gab");
       Gpp.contract(-1.0, *in.hpVertex, "Gkb", Tai, "ak", 1.0, "Gab");
-      for (size_t i(0); i < nS; i++){
+      for (int64_t i(0); i < nS; i++){
         auto iStart = i*cc4x::Nx, iEnd = std::min((i+1)*cc4x::Nx, p);
         auto y = iEnd - iStart;
-        slppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::dw, "slicecT");
+        slppVertex[i] = new tensor<Complex>(3,{g,cc4x::Nx,p}, nzc3, cc4x::world, "slicecT");
         slppVertex[i]->slice(
           {0,0,0}, {g,y,p}, 0.0, Gpp, {0,iStart,0}, {g,iEnd,p}, 1.0
         );
       }
-      for (size_t m(0); m < nS; m++)
-      for (size_t n(m); n < nS; n++){
+      for (int64_t m(0); m < nS; m++)
+      for (int64_t n(m); n < nS; n++){
         //adapt the size of Vxycd and co
         auto a(n*cc4x::Nx), b(m*cc4x::Nx);
         auto y(slppVertex[m]->lens[1]), x(slcTppVertex[n]->lens[1]);
-        tensor<Complex> Vxycd(4, {x,y,p,p}, nzc4, cc4x::dw, "Vxycd");
-        tensor<Complex> Rxyij(4, {x,y,h,h}, nzc4, cc4x::dw, "Rxyij");
-        tensor<Complex> Ryxji(4, {y,x,h,h}, nzc4, cc4x::dw, "Rxyji");
+        tensor<Complex> Vxycd(4, {x,y,p,p}, nzc4, cc4x::world, "Vxycd");
+        tensor<Complex> Rxyij(4, {x,y,h,h}, nzc4, cc4x::world, "Rxyij");
+        tensor<Complex> Ryxji(4, {y,x,h,h}, nzc4, cc4x::world, "Rxyji");
         Vxycd.contract(
           1.0, *slcTppVertex[n], "Gxc", *slppVertex[m], "Gyd", 0.0, "xycd"
         );

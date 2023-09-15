@@ -18,13 +18,13 @@ namespace Read {
     std::string fileName;
     std::string scalarType;
     std::string fileType;
-    size_t order = 0;
-    std::vector<size_t> lens;
+    int64_t order = 0;
+    std::vector<int64_t> lens;
     // The following is metaData which may or may not be given in the tensor
-    int No = 0;
-    int Nv = 0;
+    int64_t No = 0;
+    int64_t Nv = 0;
     int halfGrid = 0;
-    std::vector<size_t> kMesh = {1,1,1};
+    std::vector<int64_t> kMesh = {1,1,1};
   }; 
 
 

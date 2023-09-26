@@ -12,7 +12,8 @@ InputTensor<F>* make_def_tensor() {
   return a;
 }
 */
-#define THROW(msg) std::cout << msg << std::endl; throw msg;
+#define THROW(msg)                                                             \
+  std::cout << msg << std::endl;                                               \
+  throw msg;
 
-  //auto epsi = make_def_tensor<Complex>();
-
+// auto epsi = make_def_tensor<Complex>();

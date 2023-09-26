@@ -7,5 +7,5 @@
 #elif IBST_BACKEND
 #  include "tensor-backends/ibst.hpp"
 #else
-#error "backend not done"
+#  error "backend not done"
 #endif

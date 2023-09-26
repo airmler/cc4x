@@ -1,21 +1,21 @@
-#include <string>
 #include <iostream>
+#include <string>
 
 #include <CLI11.hpp>
 
-#include <cc4x.hpp>
-#include <Read.hpp>
-#include <Kmesh.hpp>
-#include <Slice.hpp>
-#include <Integrals.hpp>
-#include <Drccd.hpp>
 #include <Ccsd.hpp>
 #include <CcsdRef.hpp>
+#include <Drccd.hpp>
+#include <Integrals.hpp>
+#include <Kmesh.hpp>
+#include <Read.hpp>
+#include <Slice.hpp>
 #include <Ueg.hpp>
+#include <cc4x.hpp>
 
 // this is a insane hack.once in the lifetime of the universe, we will fail
 // ever tried. ever failed. no matter. try again. fail again. fail better.
-#define NULL_TENSOR ((tensor<Complex>*)0xfafa)
+#define NULL_TENSOR ((tensor<Complex> *)0xfafa)
 
 bool cc4x::verbose = 0;
 bool cc4x::complexT;
@@ -27,52 +27,63 @@ int64_t cc4x::Nv;
 int64_t cc4x::Nx;
 int64_t cc4x::NF;
 int64_t cc4x::iterations;
-World * cc4x::world = NULL;
-kMesh * cc4x::kmesh = NULL;
+World *cc4x::world = NULL;
+kMesh *cc4x::kmesh = NULL;
 
-void printSystem(){
-  if (cc4x::complexT) { LOG() << "Working with complex Integrals\n"; }
-  else { LOG() << "Working with real Integrals\n"; }
-  LOG() << "No: " << cc4x::No << " , Nv: " << cc4x::Nv << " , NF: " << cc4x::NF <<"\n";
-  LOG() << "kMesh: " << cc4x::kmesh->mesh[0] << " " << cc4x::kmesh->mesh[1] << " " << cc4x::kmesh->mesh[2] << "\n";
+void printSystem() {
+  if (cc4x::complexT) {
+    LOG() << "Working with complex Integrals\n";
+  } else {
+    LOG() << "Working with real Integrals\n";
+  }
+  LOG() << "No: " << cc4x::No << " , Nv: " << cc4x::Nv << " , NF: " << cc4x::NF
+        << "\n";
+  LOG() << "kMesh: " << cc4x::kmesh->mesh[0] << " " << cc4x::kmesh->mesh[1]
+        << " " << cc4x::kmesh->mesh[2] << "\n";
 }
 
-
-int main(int argc, char **argv){
+int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   std::string usage("cc4x: Either provide rs && No && Nv\n");
   usage += "      or provide CoulombVertex.yaml\n";
   usage += "      and EigenEnergies.yaml in the current directory\n";
   CLI::App app{usage};
   double rs(-1.0);
-  std::vector<int64_t> _kmesh({1,1,1});
-  app.add_option("-o, --occupied", cc4x::No
-                , "Number of occupied orbitals")->default_val(0);
-  app.add_option("-v, --virtuals"
-                , cc4x::Nv, "Number of virtual  orbitals")->default_val(0);
-  app.add_option("-g, --auxiliaryGrid"
-                , cc4x::NF, "Number of auxiliary filed variables")->default_val(0);
-  app.add_option("-r, --wignerSeitz"
-                , rs, "Wigner-Seitz radius")->default_val(rs);
+  std::vector<int64_t> _kmesh({1, 1, 1});
+  app.add_option("-o, --occupied", cc4x::No, "Number of occupied orbitals")
+      ->default_val(0);
+  app.add_option("-v, --virtuals", cc4x::Nv, "Number of virtual  orbitals")
+      ->default_val(0);
+  app.add_option("-g, --auxiliaryGrid",
+                 cc4x::NF,
+                 "Number of auxiliary filed variables")
+      ->default_val(0);
+  app.add_option("-r, --wignerSeitz", rs, "Wigner-Seitz radius")
+      ->default_val(rs);
   app.add_option("-m, --mesh", _kmesh, "k-Mesh")->default_val(_kmesh);
-  app.add_flag("-d, --drccd", cc4x::drccd
-              , "Calculate drccd amplitude equations")->default_val(false);
-  app.add_flag("-c, --ccsd", cc4x::ccsd
-              , "Calculate ccsd amplitude equations")->default_val(true);
-  app.add_flag("-f, --ref", cc4x::ref
-              , "Using ccsd reference implementiation")->default_val(false);
-  app.add_option("-x, --Nx", cc4x::Nx
-                , "Dimension of ppl slice size")->default_val(0);
-  app.add_option("-i, --iterations", cc4x::iterations
-                , "Number of SCF iterations")->default_val(10);
+  app.add_flag("-d, --drccd",
+               cc4x::drccd,
+               "Calculate drccd amplitude equations")
+      ->default_val(false);
+  app.add_flag("-c, --ccsd", cc4x::ccsd, "Calculate ccsd amplitude equations")
+      ->default_val(true);
+  app.add_flag("-f, --ref", cc4x::ref, "Using ccsd reference implementiation")
+      ->default_val(false);
+  app.add_option("-x, --Nx", cc4x::Nx, "Dimension of ppl slice size")
+      ->default_val(0);
+  app.add_option("-i, --iterations",
+                 cc4x::iterations,
+                 "Number of SCF iterations")
+      ->default_val(10);
   try {
     CLI11_PARSE(app, argc, argv);
-  } catch(const CLI::ParseError &e) {
+  } catch (const CLI::ParseError &e) {
     int retval = app.exit(e);
     MPI_Finalize();
     return retval;
   }
-  if (cc4x::drccd) cc4x::ccsd = false;
+  if (cc4x::drccd)
+    cc4x::ccsd = false;
 
   cc4x::world = new World();
 
@@ -102,10 +113,8 @@ int main(int argc, char **argv){
   tensor<Complex> *Vppph = NULL_TENSOR;
   tensor<Complex> *Vpppp = NULL_TENSOR;
 
-
-
   try {
-    if (rs < 0){
+    if (rs < 0) {
       Read::getAmplitudesType("CoulombVertex.yaml");
       {
         LOG() << "read eigen" << std::endl;
@@ -119,8 +128,7 @@ int main(int argc, char **argv){
         Read::output out({&coulombVertex});
         Read::run(in, out);
       }
-    } else
-    {
+    } else {
       if (cc4x::No == 0 || cc4x::Nv == 0) {
         THROW("Setting rs > 0 requires specification of No && Nv");
       }
@@ -143,39 +151,77 @@ int main(int argc, char **argv){
       Slice::output out({&hhVertex, &phVertex, &hpVertex, &ppVertex});
       Slice::run(in, out);
     }
-    delete eps; delete coulombVertex;
+    delete eps;
+    delete coulombVertex;
     {
-      LOG()<< "eval Integrals" << std::endl;
+      LOG() << "eval Integrals" << std::endl;
       Integrals::input in({hhVertex, phVertex, hpVertex, ppVertex});
-      Integrals::output out({&Vhhhh, &Vhhhp, &Vhhph, &Vhhpp, &Vhphp, &Vhppp, &Vphhh, &Vphhp, &Vphph, &Vphpp, &Vpphh, &Vpphp, &Vppph, &Vpppp});
+      Integrals::output out({&Vhhhh,
+                             &Vhhhp,
+                             &Vhhph,
+                             &Vhhpp,
+                             &Vhphp,
+                             &Vhppp,
+                             &Vphhh,
+                             &Vphhp,
+                             &Vphph,
+                             &Vphpp,
+                             &Vpphh,
+                             &Vpphp,
+                             &Vppph,
+                             &Vpppp});
       Integrals::run(in, out);
     }
-    if (cc4x::drccd)
-    {
+    if (cc4x::drccd) {
       LOG() << "drccd" << std::endl;
       Drccd::input in({Vpphh, Vphhp, Vhhpp, epsi, epsa});
       Drccd::output out({});
       Drccd::run(in, out);
     }
-    if (cc4x::ccsd && cc4x::ref)
-    {
+    if (cc4x::ccsd && cc4x::ref) {
       LOG() << "ccsdRef" << std::endl;
-      CcsdRef::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vhphp, Vhppp, Vphhh, Vphhp, Vphph, Vphpp, Vpphh, Vpphp, Vppph, Vpppp, epsi, epsa});
+      CcsdRef::input in({Vhhhh,
+                         Vhhhp,
+                         Vhhph,
+                         Vhhpp,
+                         Vhphp,
+                         Vhppp,
+                         Vphhh,
+                         Vphhp,
+                         Vphph,
+                         Vphpp,
+                         Vpphh,
+                         Vpphp,
+                         Vppph,
+                         Vpppp,
+                         epsi,
+                         epsa});
       CcsdRef::output out({});
       CcsdRef::run(in, out);
     }
-    if (cc4x::ccsd && !cc4x::ref)
-    {
-      if (cc4x::Nx == 0) cc4x::Nx = cc4x::No;
+    if (cc4x::ccsd && !cc4x::ref) {
+      if (cc4x::Nx == 0)
+        cc4x::Nx = cc4x::No;
       LOG() << "ccsd with slice size " << cc4x::Nx << std::endl;
-      Ccsd::input in({Vhhhh, Vhhhp, Vhhph, Vhhpp, Vphhh, Vphhp, Vphph, Vpphh, epsi, epsa, hhVertex, phVertex, hpVertex, ppVertex});
+      Ccsd::input in({Vhhhh,
+                      Vhhhp,
+                      Vhhph,
+                      Vhhpp,
+                      Vphhh,
+                      Vphhp,
+                      Vphph,
+                      Vpphh,
+                      epsi,
+                      epsa,
+                      hhVertex,
+                      phVertex,
+                      hpVertex,
+                      ppVertex});
       Ccsd::output out({});
       Ccsd::run(in, out);
     }
 
-  } catch (...) {
-    LOG() << "WHAT THE FUCK" << std::endl;
-  }
+  } catch (...) { LOG() << "WHAT THE FUCK" << std::endl; }
 
   delete cc4x::world;
 

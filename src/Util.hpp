@@ -1,22 +1,25 @@
-#include <vector>
-#include <string>
+#include <Tensor.hpp>
+#include <chrono>
 #include <complex>
 #include <fstream>
-#include <Tensor.hpp>
 #include <iomanip>
-#include <yaml-cpp/yaml.h>
-#include <chrono>
 #include <map>
+#include <string>
+#include <vector>
+#include <yaml-cpp/yaml.h>
 
 #ifndef UTIL_DEFINED
-#define UTIL_DEFINED
-
+#  define UTIL_DEFINED
 
 using Complex = std::complex<double>;
 
-#define THROW(msg) std::cout << msg << std::endl; throw msg;
+#  define THROW(msg)                                                           \
+    std::cout << msg << std::endl;                                             \
+    throw msg;
 
-#define LOG() if (!cc4x::world->rank) std::cout << std::setprecision(8)
+#  define LOG()                                                                \
+    if (!cc4x::world->rank)                                                    \
+    std::cout << std::setprecision(8)
 
 // taken from Atrip code of AGallo
 struct Timer {
@@ -30,6 +33,5 @@ struct Timer {
   inline double count() const noexcept { return duration.count(); }
 };
 using Timings = std::map<std::string, Timer>;
-
 
 #endif
